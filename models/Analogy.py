@@ -4,15 +4,23 @@ import tensorflow as tf
 from .Model import Model
 
 class Analogy(Model):
+    def __init__(self,
+            lmbda:float=0.0,
+            hidden_size:int=100,
+            **kwargs):
+
+        self.lmbda = lmbda
+        self.hidden_size = hidden_size
+
+        super().__init__(**kwargs)
 	
 	def embedding_def(self):
-		config = self.get_config()
-		self.ent1_embeddings = tf.get_variable(name = "ent1_embeddings", shape = [config.entTotal, config.hidden_size/2], initializer = tf.contrib.layers.xavier_initializer(uniform = True))
-		self.rel1_embeddings = tf.get_variable(name = "rel1_embeddings", shape = [config.relTotal, config.hidden_size/2], initializer = tf.contrib.layers.xavier_initializer(uniform = True))
-		self.ent2_embeddings = tf.get_variable(name = "ent2_embeddings", shape = [config.entTotal, config.hidden_size/2], initializer = tf.contrib.layers.xavier_initializer(uniform = True))
-		self.rel2_embeddings = tf.get_variable(name = "rel2_embeddings", shape = [config.relTotal, config.hidden_size/2], initializer = tf.contrib.layers.xavier_initializer(uniform = True))
-		self.ent_embeddings  = tf.get_variable(name = "ent_embeddings", shape = [config.entTotal, config.hidden_size], initializer = tf.contrib.layers.xavier_initializer(uniform = True))
-		self.rel_embeddings  = tf.get_variable(name = "rel_embeddings", shape = [config.relTotal, config.hidden_size], initializer = tf.contrib.layers.xavier_initializer(uniform = True))
+		self.ent1_embeddings = tf.get_variable(name = "ent1_embeddings", shape = [self.n_entities, self.hidden_size/2], initializer = tf.contrib.layers.xavier_initializer(uniform = True))
+		self.rel1_embeddings = tf.get_variable(name = "rel1_embeddings", shape = [self.n_relations, self.hidden_size/2], initializer = tf.contrib.layers.xavier_initializer(uniform = True))
+		self.ent2_embeddings = tf.get_variable(name = "ent2_embeddings", shape = [self.n_entities, self.hidden_size/2], initializer = tf.contrib.layers.xavier_initializer(uniform = True))
+		self.rel2_embeddings = tf.get_variable(name = "rel2_embeddings", shape = [self.n_relations, self.hidden_size/2], initializer = tf.contrib.layers.xavier_initializer(uniform = True))
+		self.ent_embeddings  = tf.get_variable(name = "ent_embeddings", shape = [self.n_entities, self.hidden_size], initializer = tf.contrib.layers.xavier_initializer(uniform = True))
+		self.rel_embeddings  = tf.get_variable(name = "rel_embeddings", shape = [self.n_relations, self.hidden_size], initializer = tf.contrib.layers.xavier_initializer(uniform = True))
 		self.parameter_lists = {"ent_re_embeddings":self.ent1_embeddings, \
 								"ent_im_embeddings":self.ent2_embeddings, \
 								"rel_re_embeddings":self.rel1_embeddings, \
@@ -28,8 +36,6 @@ class Analogy(Model):
 		return e_h * e_t * rel
 	
 	def loss_def(self):
-		#Obtaining the initial configuration of the model
-		config = self.get_config()
 		#To get positive triples and negative triples for training
 		#To get labels for the triples, positive triples as 1 and negative triples as -1
 		#The shapes of h, t, r, y are (batch_size, 1 + negative_ent + negative_rel)
@@ -52,10 +58,9 @@ class Analogy(Model):
 		loss_func = tf.reduce_mean(tf.nn.softplus(- y * res), 0, keep_dims = False)
 		regul_func = tf.reduce_mean(e1_h ** 2) + tf.reduce_mean(e1_t ** 2) + tf.reduce_mean(e2_h ** 2) + tf.reduce_mean(e2_t ** 2) + tf.reduce_mean(r1 ** 2) + tf.reduce_mean(r2 ** 2) + tf.reduce_mean(e_h ** 2) + tf.reduce_mean(e_t ** 2) + tf.reduce_mean(rel ** 2)
 		#Calculating loss to get what the framework will optimize
-		self.loss =  loss_func + config.lmbda * regul_func
+		self.loss =  loss_func + self.lmbda * regul_func
 
 	def predict_def(self):
-		config = self.get_config()
 		predict_h, predict_t, predict_r = self.get_predict_instance()
 		predict_h_e1 = tf.nn.embedding_lookup(self.ent1_embeddings, predict_h)
 		predict_t_e1 = tf.nn.embedding_lookup(self.ent1_embeddings, predict_t)

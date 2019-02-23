@@ -4,10 +4,23 @@ import tensorflow as tf
 from .Model import Model
 
 class TransH(Model):
-	r'''
+	'''
 	To preserve the mapping propertities of 1-N/N-1/N-N relations, 
 	TransH inperprets a relation as a translating operation on a hyperplane. 
 	'''
+
+    def __init__(self,
+            rel_size:int=100,
+            hidden_size:int=100,
+            margin:float=1.0,
+            **kwargs):
+
+        self.rel_size = rel_size
+        self.hidden_size = hidden_size
+        self.margin = margin
+
+        super().__init__(**kwargs)
+
 	def _transfer(self, e, n):
 		return e - tf.reduce_sum(e * n, 1, keep_dims = True) * n
 
@@ -15,19 +28,15 @@ class TransH(Model):
 		return abs(h + r - t)
 
 	def embedding_def(self):
-		#Obtaining the initial configuration of the model
-		config = self.get_config()
 		#Defining required parameters of the model, including embeddings of entities and relations, and normal vectors of planes
-		self.ent_embeddings = tf.get_variable(name = "ent_embeddings", shape = [config.entTotal, config.hidden_size], initializer = tf.contrib.layers.xavier_initializer(uniform = False))
-		self.rel_embeddings = tf.get_variable(name = "rel_embeddings", shape = [config.relTotal, config.hidden_size], initializer = tf.contrib.layers.xavier_initializer(uniform = False))
-		self.normal_vectors = tf.get_variable(name = "normal_vectors", shape = [config.relTotal, config.hidden_size], initializer = tf.contrib.layers.xavier_initializer(uniform = False))
+		self.ent_embeddings = tf.get_variable(name = "ent_embeddings", shape = [self.n_entities, self.hidden_size], initializer = tf.contrib.layers.xavier_initializer(uniform = False))
+		self.rel_embeddings = tf.get_variable(name = "rel_embeddings", shape = [self.n_relations, self.hidden_size], initializer = tf.contrib.layers.xavier_initializer(uniform = False))
+		self.normal_vectors = tf.get_variable(name = "normal_vectors", shape = [self.n_entities, self.hidden_size], initializer = tf.contrib.layers.xavier_initializer(uniform = False))
 		self.parameter_lists = {"ent_embeddings":self.ent_embeddings, \
 								"rel_embeddings":self.rel_embeddings, \
 								"normal_vectors":self.normal_vectors}
 
 	def loss_def(self):
-		#Obtaining the initial configuration of the model
-		config = self.get_config()
 		#To get positive triples and negative triples for training
 		#The shapes of pos_h, pos_t, pos_r are (batch_size)
 		#The shapes of neg_h, neg_t, neg_r are ((negative_ent + negative_rel) × batch_size)
@@ -65,18 +74,17 @@ class TransH(Model):
 		#The shape of _p_score is (1, batch_size, hidden_size)
 		#The shape of _n_score is (negative_ent + negative_rel, batch_size, hidden_size)
 		_p_score = self._calc(p_h, p_t, p_r)
-		_p_score = tf.reshape(_p_score, [1, -1, config.rel_size])
+		_p_score = tf.reshape(_p_score, [1, -1, self.rel_size])
 		_n_score = self._calc(n_h, n_t, n_r)
-		_n_score = tf.reshape(_n_score, [config.negative_ent + config.negative_rel, -1, config.rel_size])
+		_n_score = tf.reshape(_n_score, [self.n_negative, -1, self.rel_size])
 		#The shape of p_score is (batch_size, 1)
 		#The shape of n_score is (batch_size, 1)
 		p_score =  tf.reduce_sum(tf.reduce_mean(_p_score, 0, keep_dims = False), 1, keep_dims = True)
 		n_score =  tf.reduce_sum(tf.reduce_mean(_n_score, 0, keep_dims = False), 1, keep_dims = True)
 		#Calculating loss to get what the framework will optimize
-		self.loss = tf.reduce_sum(tf.maximum(p_score - n_score + config.margin, 0))
+		self.loss = tf.reduce_sum(tf.maximum(p_score - n_score + self.margin, 0))
 
 	def predict_def(self):
-		config = self.get_config()
 		predict_h, predict_t, predict_r = self.get_predict_instance()
 		predict_h_e = tf.nn.embedding_lookup(self.ent_embeddings, predict_h)
 		predict_t_e = tf.nn.embedding_lookup(self.ent_embeddings, predict_t)

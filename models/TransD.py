@@ -4,10 +4,23 @@ import tensorflow as tf
 from .Model import Model
 
 class TransD(Model):
-	r'''
-	TransD constructs a dynamic mapping matrix for each entity-relation pair by considering the diversity of entities and relations simultaneously. 
-	Compared with TransR/CTransR, TransD has fewer parameters and has no matrix vector multiplication.
 	'''
+    TransD constructs a dynamic mapping matrix for each entity-relation pair by
+    considering the diversity of entities and relations simultaneously.
+    Compared with TransR/CTransR, TransD has fewer parameters and has no matrix
+    vector multiplication.
+	'''
+
+    def __init__(self,
+            hidden_size:int=100,
+            margin:float=1.0,
+            **kwargs):
+
+        self.hidden_size = hidden_size
+        self.margin = margin
+
+        super().__init__(**kwargs)
+
 	def _transfer(self, e, t, r):
 		return tf.nn.l2_normalize(e + tf.reduce_sum(e * t, 1, keep_dims = True) * r, -1)
 
@@ -15,21 +28,17 @@ class TransD(Model):
 		return abs(h + r - t)
 
 	def embedding_def(self):
-		#Obtaining the initial configuration of the model
-		config = self.get_config()
 		#Defining required parameters of the model, including embeddings of entities and relations, entity transfer vectors, and relation transfer vectors
-		self.ent_embeddings = tf.get_variable(name = "ent_embeddings", shape = [config.entTotal, config.hidden_size], initializer = tf.contrib.layers.xavier_initializer(uniform = False))
-		self.rel_embeddings = tf.get_variable(name = "rel_embeddings", shape = [config.relTotal, config.hidden_size], initializer = tf.contrib.layers.xavier_initializer(uniform = False))
-		self.ent_transfer = tf.get_variable(name = "ent_transfer", shape = [config.entTotal, config.hidden_size], initializer = tf.contrib.layers.xavier_initializer(uniform = False))
-		self.rel_transfer = tf.get_variable(name = "rel_transfer", shape = [config.relTotal, config.hidden_size], initializer = tf.contrib.layers.xavier_initializer(uniform = False))
+		self.ent_embeddings = tf.get_variable(name = "ent_embeddings", shape = [self.n_entities, self.hidden_size], initializer = tf.contrib.layers.xavier_initializer(uniform = False))
+		self.rel_embeddings = tf.get_variable(name = "rel_embeddings", shape = [self.n_relations, self.hidden_size], initializer = tf.contrib.layers.xavier_initializer(uniform = False))
+		self.ent_transfer = tf.get_variable(name = "ent_transfer", shape = [self.n_entities, self.hidden_size], initializer = tf.contrib.layers.xavier_initializer(uniform = False))
+		self.rel_transfer = tf.get_variable(name = "rel_transfer", shape = [self.n_relations, self.hidden_size], initializer = tf.contrib.layers.xavier_initializer(uniform = False))
 		self.parameter_lists = {"ent_embeddings":self.ent_embeddings, \
 								"rel_embeddings":self.rel_embeddings, \
 								"ent_transfer":self.ent_transfer, \
 								"rel_transfer":self.rel_transfer}
 
 	def loss_def(self):
-		#Obtaining the initial configuration of the model
-		config = self.get_config()
 		#To get positive triples and negative triples for training
 		#The shapes of pos_h, pos_t, pos_r are (batch_size, 1)
 		#The shapes of neg_h, neg_t, neg_r are (batch_size, negative_ent + negative_rel)
@@ -65,10 +74,9 @@ class TransD(Model):
 		p_score =  tf.reduce_sum(tf.reduce_mean(_p_score, 1, keep_dims = False), 1, keep_dims = True)
 		n_score =  tf.reduce_sum(tf.reduce_mean(_n_score, 1, keep_dims = False), 1, keep_dims = True)
 		#Calculating loss to get what the framework will optimize
-		self.loss = tf.reduce_sum(tf.maximum(p_score - n_score + config.margin, 0))
+		self.loss = tf.reduce_sum(tf.maximum(p_score - n_score + self.margin, 0))
 
 	def predict_def(self):
-		config = self.get_config()
 		predict_h, predict_t, predict_r = self.get_predict_instance()
 		predict_h_e = tf.nn.embedding_lookup(self.ent_embeddings, predict_h)
 		predict_t_e = tf.nn.embedding_lookup(self.ent_embeddings, predict_t)
