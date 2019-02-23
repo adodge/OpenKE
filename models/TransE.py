@@ -4,25 +4,32 @@ import tensorflow as tf
 from .Model import Model
 
 class TransE(Model):
-	r'''
+	'''
 	TransE is the first model to introduce translation-based embedding, 
 	which interprets relations as the translations operating on entities.
 	'''
+
+    def __init__(self,
+            hidden_size:int=100,
+            margin:float=1.0,
+            **kwargs):
+
+        self.hidden_size = hidden_size
+        self.margin = margin
+
+        super().__init__(**kwargs)
+
 	def _calc(self, h, t, r):
 		return abs(h + r - t)
 
 	def embedding_def(self):
-		#Obtaining the initial configuration of the model
-		config = self.get_config()
 		#Defining required parameters of the model, including embeddings of entities and relations
-		self.ent_embeddings = tf.get_variable(name = "ent_embeddings", shape = [config.entTotal, config.hidden_size], initializer = tf.contrib.layers.xavier_initializer(uniform = False))
-		self.rel_embeddings = tf.get_variable(name = "rel_embeddings", shape = [config.relTotal, config.hidden_size], initializer = tf.contrib.layers.xavier_initializer(uniform = False))
+		self.ent_embeddings = tf.get_variable(name = "ent_embeddings", shape = [self.entTotal, self.hidden_size], initializer = tf.contrib.layers.xavier_initializer(uniform = False))
+		self.rel_embeddings = tf.get_variable(name = "rel_embeddings", shape = [self.relTotal, self.hidden_size], initializer = tf.contrib.layers.xavier_initializer(uniform = False))
 		self.parameter_lists = {"ent_embeddings":self.ent_embeddings, \
 								"rel_embeddings":self.rel_embeddings}
 
 	def loss_def(self):
-		#Obtaining the initial configuration of the model
-		config = self.get_config()
 		#To get positive triples and negative triples for training
 		#The shapes of pos_h, pos_t, pos_r are (batch_size, 1)
 		#The shapes of neg_h, neg_t, neg_r are (batch_size, negative_ent + negative_rel)
@@ -45,7 +52,7 @@ class TransE(Model):
 		p_score =  tf.reduce_sum(tf.reduce_mean(_p_score, 1, keep_dims = False), 1, keep_dims = True)
 		n_score =  tf.reduce_sum(tf.reduce_mean(_n_score, 1, keep_dims = False), 1, keep_dims = True)
 		#Calculating loss to get what the framework will optimize
-		self.loss = tf.reduce_sum(tf.maximum(p_score - n_score + config.margin, 0))
+		self.loss = tf.reduce_sum(tf.maximum(p_score - n_score + self.margin, 0))
 
 	def predict_def(self):
 		predict_h, predict_t, predict_r = self.get_predict_instance()
