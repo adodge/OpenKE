@@ -30,12 +30,10 @@ class Config(object):
 		self.train_times = 0
 		self.nbatches = 100
 		self.workThreads = 1
-		self.alpha = 0.001
 		self.log_on = 1
 		self.exportName = None
 		self.importName = None
 		self.export_steps = 0
-		self.opt_method = "SGD"
 		self.optimizer = None
 		self.test_link_prediction = False
 		self.test_triple_classification = False
@@ -125,9 +123,6 @@ class Config(object):
 	def set_optimizer(self, optimizer):
 		self.optimizer = optimizer
 
-	def set_opt_method(self, method):
-		self.opt_method = method
-
 	def set_test_link_prediction(self, flag):
 		self.test_link_prediction = flag
 
@@ -136,9 +131,6 @@ class Config(object):
 
 	def set_log_on(self, flag):
 		self.log_on = flag
-
-	def set_alpha(self, alpha):
-		self.alpha = alpha
 
 	def set_in_path(self, path):
 		self.in_path = path
@@ -238,28 +230,8 @@ class Config(object):
 			self.set_parameters_by_name(i, lists[i])
 
 	def set_model(self, model):
-		self.model = model
-		self.graph = tf.Graph()
-		with self.graph.as_default():
-			self.sess = tf.Session()
-			with self.sess.as_default():
-				initializer = tf.contrib.layers.xavier_initializer(uniform = True)
-				with tf.variable_scope("model", reuse=None, initializer = initializer):
-					self.trainModel = self.model(config = self)
-					if self.optimizer != None:
-						pass
-					elif self.opt_method == "Adagrad" or self.opt_method == "adagrad":
-						self.optimizer = tf.train.AdagradOptimizer(learning_rate = self.alpha, initial_accumulator_value=1e-20)
-					elif self.opt_method == "Adadelta" or self.opt_method == "adadelta":
-						self.optimizer = tf.train.AdadeltaOptimizer(self.alpha)
-					elif self.opt_method == "Adam" or self.opt_method == "adam":
-						self.optimizer = tf.train.AdamOptimizer(self.alpha)
-					else:
-						self.optimizer = tf.train.GradientDescentOptimizer(self.alpha)
-					grads_and_vars = self.optimizer.compute_gradients(self.trainModel.loss)
-					self.train_op = self.optimizer.apply_gradients(grads_and_vars)
-				self.saver = tf.train.Saver()
-				self.sess.run(tf.initialize_all_variables())
+        raise NotImplementedError
+        # XXX Moved to model.create_graph
 
 	def train_step(self, batch_h, batch_t, batch_r, batch_y):
 		feed_dict = {
