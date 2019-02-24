@@ -50,12 +50,17 @@ class HolE(Model):
         self.parameter_lists = {"ent_embeddings":self.ent_embeddings, \
                                 "rel_embeddings":self.rel_embeddings, }
 
-    def loss_def(self):
+    def loss(self, batch_h, batch_t, batch_r, batch_size, n_negative):
+
+        inputs = self.split_inputs( batch_h, batch_t, batch_r, batch_size,
+                n_negative)
+
         #To get positive triples and negative triples for training
         #The shapes of pos_h, pos_t, pos_r are (batch_size, 1)
-        #The shapes of neg_h, neg_t, neg_r are (batch_size, negative_ent + negative_rel)
-        pos_h, pos_t, pos_r = self.get_positive_instance(in_batch = True)
-        neg_h, neg_t, neg_r = self.get_negative_instance(in_batch = True)
+        #The shapes of neg_h, neg_t, neg_r are (batch_size, n_negative)
+        pos_h, pos_t, pos_r = inputs['positive_h'],inputs['positive_t'],inputs['positive_r']
+        neg_h, neg_t, neg_r = inputs['negative_h'],inputs['negative_t'],inputs['negative_r']
+
         #Embedding entities and relations of triples, e.g. pos_h_e, pos_t_e and pos_r_e are embeddings for positive triples
         pos_h_e = tf.reshape(tf.nn.embedding_lookup(self.ent_embeddings, pos_h), [-1, self.hidden_size])
         pos_t_e = tf.reshape(tf.nn.embedding_lookup(self.ent_embeddings, pos_t), [-1, self.hidden_size])
@@ -63,17 +68,20 @@ class HolE(Model):
         neg_h_e = tf.reshape(tf.nn.embedding_lookup(self.ent_embeddings, neg_h), [-1, self.hidden_size])
         neg_t_e = tf.reshape(tf.nn.embedding_lookup(self.ent_embeddings, neg_t), [-1, self.hidden_size])
         neg_r_e = tf.reshape(tf.nn.embedding_lookup(self.rel_embeddings, neg_r), [-1, self.hidden_size])
+
         #Calculating score functions for all positive triples and negative triples 
         #The shape of _p_score is (batch_size, 1, 1)
         #The shape of _n_score is (batch_size, negative_ent + negative_rel, 1)
         _p_score = tf.reshape(self._calc(pos_h_e, pos_t_e, pos_r_e), [-1, 1])
         _n_score = tf.reshape(self._calc(neg_h_e, neg_t_e, neg_r_e), [-1, self.n_negative])
+
         #The shape of p_score is (batch_size, 1)
         #The shape of n_score is (batch_size, 1)
         p_score =  _p_score
         n_score =  tf.reduce_mean(_n_score, 1, keep_dims = True)
+
         #Calculating loss to get what the framework will optimize
-        self.loss = tf.reduce_sum(tf.maximum(p_score - n_score + self.margin, 0))
+        return tf.reduce_sum(tf.maximum(p_score - n_score + self.margin, 0))
 
     def predict_def(self):
         predict_h, predict_t, predict_r = self.get_predict_instance()

@@ -39,12 +39,16 @@ class RESCAL(Model):
 
         self.parameter_lists = {"ent_embeddings":self.ent_embeddings, \
                                 "rel_matrices":self.rel_matrices}
-    def loss_def(self):
+    def loss(self, batch_h, batch_t, batch_r, batch_size, n_negative):
+
+        inputs = self.split_inputs( batch_h, batch_t, batch_r, batch_size, n_negative)
+
         #To get positive triples and negative triples for training
         #The shapes of pos_h, pos_t, pos_r are (batch_size, 1)
-        #The shapes of neg_h, neg_t, neg_r are (batch_size, negative_ent + negative_rel)
-        pos_h, pos_t, pos_r = self.get_positive_instance(in_batch = True)
-        neg_h, neg_t, neg_r = self.get_negative_instance(in_batch = True)
+        #The shapes of neg_h, neg_t, neg_r are (batch_size, n_negative)
+        pos_h, pos_t, pos_r = inputs['positive_h'],inputs['positive_t'],inputs['positive_r']
+        neg_h, neg_t, neg_r = inputs['negative_h'],inputs['negative_t'],inputs['negative_r']
+
         #Embedding entities and relations of triples, e.g. p_h, p_t and p_r are embeddings for positive triples
         p_h = tf.reshape(tf.nn.embedding_lookup(self.ent_embeddings, pos_h), [-1, self.hidden_size, 1])
         p_t = tf.reshape(tf.nn.embedding_lookup(self.ent_embeddings, pos_t), [-1, self.hidden_size, 1])
@@ -52,16 +56,19 @@ class RESCAL(Model):
         n_h = tf.reshape(tf.nn.embedding_lookup(self.ent_embeddings, neg_h), [-1, self.hidden_size, 1])
         n_t = tf.reshape(tf.nn.embedding_lookup(self.ent_embeddings, neg_t), [-1, self.hidden_size, 1])
         n_r = tf.reshape(tf.nn.embedding_lookup(self.rel_matrices, neg_r), [-1, self.hidden_size, self.hidden_size])
+
         #The shape of _p_score is (batch_size, 1, hidden_size)
         #The shape of _n_score is (batch_size, negative_ent + negative_rel, hidden_size)
         _p_score = tf.reshape(self._calc(p_h, p_t, p_r), [-1, 1, self.hidden_size])
         _n_score = tf.reshape(self._calc(n_h, n_t, n_r), [-1, self.n_negative, self.hidden_size])
+
         #The shape of p_score is (batch_size, 1)
         #The shape of n_score is (batch_size, 1)
         p_score =  tf.reduce_sum(tf.reduce_mean(_p_score, 1, keep_dims = False), 1, keep_dims = True)
         n_score =  tf.reduce_sum(tf.reduce_mean(_n_score, 1, keep_dims = False), 1, keep_dims = True)
+
         #Calculating loss to get what the framework will optimize
-        self.loss = tf.reduce_sum(tf.maximum(n_score - p_score + self.margin, 0))
+        return tf.reduce_sum(tf.maximum(n_score - p_score + self.margin, 0))
     
     def predict_def(self):
         predict_h, predict_t, predict_r = self.get_predict_instance()

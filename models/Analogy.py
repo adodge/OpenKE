@@ -63,12 +63,8 @@ class Analogy(Model):
     def _calc_dist(self, e_h, e_t, rel):
         return e_h * e_t * rel
     
-    def loss_def(self):
-        #To get positive triples and negative triples for training
-        #To get labels for the triples, positive triples as 1 and negative triples as -1
-        #The shapes of h, t, r, y are (batch_size, 1 + negative_ent + negative_rel)
-        h, t, r = self.get_all_instance()
-        y = self.get_all_labels()
+    def loss(self, h, t, r, y):
+        #The shapes of h, t, r, y are (batch_size, 1 + n_negative)
         #Embedding entities and relations of triples
         e1_h = tf.nn.embedding_lookup(self.ent1_embeddings, h)
         e2_h = tf.nn.embedding_lookup(self.ent2_embeddings, h)
@@ -79,14 +75,16 @@ class Analogy(Model):
         r1 = tf.nn.embedding_lookup(self.rel1_embeddings, r)
         r2 = tf.nn.embedding_lookup(self.rel2_embeddings, r)
         rel = tf.nn.embedding_lookup(self.rel_embeddings, r)
+
         #Calculating score functions for all positive triples and negative triples
         res_comp = tf.reduce_sum(self._calc_comp(e1_h, e2_h, e1_t, e2_t, r1, r2), 1, keep_dims = False)
         res_dist = tf.reduce_sum(self._calc_dist(e_h, e_t, rel), 1, keep_dims = False)
         res = res_comp + res_dist
         loss_func = tf.reduce_mean(tf.nn.softplus(- y * res), 0, keep_dims = False)
         regul_func = tf.reduce_mean(e1_h ** 2) + tf.reduce_mean(e1_t ** 2) + tf.reduce_mean(e2_h ** 2) + tf.reduce_mean(e2_t ** 2) + tf.reduce_mean(r1 ** 2) + tf.reduce_mean(r2 ** 2) + tf.reduce_mean(e_h ** 2) + tf.reduce_mean(e_t ** 2) + tf.reduce_mean(rel ** 2)
+
         #Calculating loss to get what the framework will optimize
-        self.loss =  loss_func + self.lmbda * regul_func
+        return  loss_func + self.lmbda * regul_func
 
     def predict_def(self):
         predict_h, predict_t, predict_r = self.get_predict_instance()

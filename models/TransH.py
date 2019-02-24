@@ -50,12 +50,17 @@ class TransH(Model):
                                 "rel_embeddings":self.rel_embeddings, \
                                 "normal_vectors":self.normal_vectors}
 
-    def loss_def(self):
+    def loss(self, batch_h, batch_t, batch_r, batch_size, n_negative):
+
+        inputs = self.split_inputs( batch_h, batch_t, batch_r, batch_size,
+                n_negative)
+
         #To get positive triples and negative triples for training
-        #The shapes of pos_h, pos_t, pos_r are (batch_size)
-        #The shapes of neg_h, neg_t, neg_r are ((negative_ent + negative_rel) × batch_size)
-        pos_h, pos_t, pos_r = self.get_positive_instance(in_batch = False)
-        neg_h, neg_t, neg_r = self.get_negative_instance(in_batch = False)
+        #The shapes of pos_h, pos_t, pos_r are (batch_size, 1)
+        #The shapes of neg_h, neg_t, neg_r are (batch_size, n_negative)
+        pos_h, pos_t, pos_r = inputs['positive_h'],inputs['positive_t'],inputs['positive_r']
+        neg_h, neg_t, neg_r = inputs['negative_h'],inputs['negative_t'],inputs['negative_r']
+
         #Embedding entities and relations of triples, e.g. pos_h_e, pos_t_e and pos_r_e are embeddings for positive triples
         pos_h_e = tf.nn.embedding_lookup(self.ent_embeddings, pos_h)
         pos_t_e = tf.nn.embedding_lookup(self.ent_embeddings, pos_t)
@@ -63,6 +68,7 @@ class TransH(Model):
         neg_h_e = tf.nn.embedding_lookup(self.ent_embeddings, neg_h)
         neg_t_e = tf.nn.embedding_lookup(self.ent_embeddings, neg_t)
         neg_r_e = tf.nn.embedding_lookup(self.rel_embeddings, neg_r)
+
         #Getting the required normal vectors of planes to transfer entity embeddings
         pos_norm = tf.nn.embedding_lookup(self.normal_vectors, pos_r)
         neg_norm = tf.nn.embedding_lookup(self.normal_vectors, neg_r)
@@ -84,19 +90,22 @@ class TransH(Model):
         n_h = self._transfer(neg_h_e, neg_norm)
         n_t = self._transfer(neg_t_e, neg_norm)
         n_r = neg_r_e
+
         #Calculating score functions for all positive triples and negative triples
         #The shape of _p_score is (1, batch_size, hidden_size)
-        #The shape of _n_score is (negative_ent + negative_rel, batch_size, hidden_size)
+        #The shape of _n_score is (n_negative, batch_size, hidden_size)
         _p_score = self._calc(p_h, p_t, p_r)
         _p_score = tf.reshape(_p_score, [1, -1, self.rel_size])
         _n_score = self._calc(n_h, n_t, n_r)
         _n_score = tf.reshape(_n_score, [self.n_negative, -1, self.rel_size])
+
         #The shape of p_score is (batch_size, 1)
         #The shape of n_score is (batch_size, 1)
         p_score =  tf.reduce_sum(tf.reduce_mean(_p_score, 0, keep_dims = False), 1, keep_dims = True)
         n_score =  tf.reduce_sum(tf.reduce_mean(_n_score, 0, keep_dims = False), 1, keep_dims = True)
+
         #Calculating loss to get what the framework will optimize
-        self.loss = tf.reduce_sum(tf.maximum(p_score - n_score + self.margin, 0))
+        return tf.reduce_sum(tf.maximum(p_score - n_score + self.margin, 0))
 
     def predict_def(self):
         predict_h, predict_t, predict_r = self.get_predict_instance()

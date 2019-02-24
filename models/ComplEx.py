@@ -51,12 +51,8 @@ class ComplEx(Model):
     def _calc(self, e1_h, e2_h, e1_t, e2_t, r1, r2):
         return e1_h * e1_t * r1 + e2_h * e2_t * r1 + e1_h * e2_t * r2 - e2_h * e1_t * r2
 
-    def loss_def(self):
-        #To get positive triples and negative triples for training
-        #To get labels for the triples, positive triples as 1 and negative triples as -1
-        #The shapes of h, t, r, y are (batch_size, 1 + negative_ent + negative_rel)
-        h, t, r = self.get_all_instance()
-        y = self.get_all_labels()
+    def loss(self, h, t, r, y):
+        #The shapes of h, t, r, y are (batch_size, 1 + n_negative)
         #Embedding entities and relations of triples
         e1_h = tf.nn.embedding_lookup(self.ent1_embeddings, h)
         e2_h = tf.nn.embedding_lookup(self.ent2_embeddings, h)
@@ -64,12 +60,14 @@ class ComplEx(Model):
         e2_t = tf.nn.embedding_lookup(self.ent2_embeddings, t)
         r1 = tf.nn.embedding_lookup(self.rel1_embeddings, r)
         r2 = tf.nn.embedding_lookup(self.rel2_embeddings, r)
+
         #Calculating score functions for all positive triples and negative triples
         res = tf.reduce_sum(self._calc(e1_h, e2_h, e1_t, e2_t, r1, r2), 1, keep_dims = False)
         loss_func = tf.reduce_mean(tf.nn.softplus(- y * res), 0, keep_dims = False)
         regul_func = tf.reduce_mean(e1_h ** 2) + tf.reduce_mean(e1_t ** 2) + tf.reduce_mean(e2_h ** 2) + tf.reduce_mean(e2_t ** 2) + tf.reduce_mean(r1 ** 2) + tf.reduce_mean(r2 ** 2)
+
         #Calculating loss to get what the framework will optimize
-        self.loss =  loss_func + self.lmbda * regul_func
+        return loss_func + self.lmbda * regul_func
 
     def predict_def(self):
         predict_h, predict_t, predict_r = self.get_predict_instance()

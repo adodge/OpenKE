@@ -52,12 +52,17 @@ class TransR(Model):
                                 "rel_embeddings":self.rel_embeddings, \
                                 "transfer_matrix":self.transfer_matrix}
 
-    def loss_def(self):
+    def loss(self, batch_h, batch_t, batch_r, batch_size, n_negative):
+
+        inputs = self.split_inputs( batch_h, batch_t, batch_r, batch_size,
+                n_negative)
+
         #To get positive triples and negative triples for training
         #The shapes of pos_h, pos_t, pos_r are (batch_size, 1)
-        #The shapes of neg_h, neg_t, neg_r are (batch_size, negative_ent + negative_rel)
-        pos_h, pos_t, pos_r = self.get_positive_instance(in_batch = True)
-        neg_h, neg_t, neg_r = self.get_negative_instance(in_batch = True)
+        #The shapes of neg_h, neg_t, neg_r are (batch_size, n_negative)
+        pos_h, pos_t, pos_r = inputs['positive_h'],inputs['positive_t'],inputs['positive_r']
+        neg_h, neg_t, neg_r = inputs['negative_h'],inputs['negative_t'],inputs['negative_r']
+
         #Embedding entities and relations of triples, e.g. pos_h_e, pos_t_e and pos_r_e are embeddings for positive triples
         pos_h_e = tf.reshape(tf.nn.embedding_lookup(self.ent_embeddings, pos_h), [-1, self.ent_size, 1])
         pos_t_e = tf.reshape(tf.nn.embedding_lookup(self.ent_embeddings, pos_t), [-1, self.ent_size, 1])
@@ -65,9 +70,11 @@ class TransR(Model):
         neg_h_e = tf.reshape(tf.nn.embedding_lookup(self.ent_embeddings, neg_h), [-1, self.ent_size, 1])
         neg_t_e = tf.reshape(tf.nn.embedding_lookup(self.ent_embeddings, neg_t), [-1, self.ent_size, 1])
         neg_r_e = tf.reshape(tf.nn.embedding_lookup(self.rel_embeddings, neg_r), [-1, self.rel_size])
+
         #Getting the required mapping matrices
         pos_matrix = tf.reshape(tf.nn.embedding_lookup(self.transfer_matrix, pos_r), [-1, self.rel_size, self.ent_size])
         neg_matrix = tf.reshape(tf.nn.embedding_lookup(self.transfer_matrix, neg_r), [-1, self.rel_size, self.ent_size])
+
         #Calculating score functions for all positive triples and negative triples
         p_h = tf.reshape(self._transfer(pos_matrix, pos_h_e), [-1, self.rel_size])
         p_t = tf.reshape(self._transfer(pos_matrix, pos_t_e), [-1, self.rel_size])
@@ -75,18 +82,21 @@ class TransR(Model):
         n_h = tf.reshape(self._transfer(neg_matrix, neg_h_e), [-1, self.rel_size])
         n_t = tf.reshape(self._transfer(neg_matrix, neg_t_e), [-1, self.rel_size])
         n_r = neg_r_e
+
         #The shape of _p_score is (batch_size, 1, hidden_size)
         #The shape of _n_score is (batch_size, negative_ent + negative_rel, hidden_size)
         _p_score = self._calc(p_h, p_t, p_r)
         _p_score = tf.reshape(_p_score, [-1, 1, self.rel_size])
         _n_score = self._calc(n_h, n_t, n_r)
         _n_score = tf.reshape(_n_score, [-1, self.n_negative, self.rel_size])
+
         #The shape of p_score is (batch_size, 1)
         #The shape of n_score is (batch_size, 1)
         p_score =  tf.reduce_sum(tf.reduce_mean(_p_score, 1, keep_dims = False), 1, keep_dims = True)
         n_score =  tf.reduce_sum(tf.reduce_mean(_n_score, 1, keep_dims = False), 1, keep_dims = True)
+
         #Calculating loss to get what the framework will optimize
-        self.loss = tf.reduce_sum(tf.maximum(p_score - n_score + self.margin, 0))
+        return tf.reduce_sum(tf.maximum(p_score - n_score + self.margin, 0))
 
     def predict_def(self):
         predict_h, predict_t, predict_r = self.get_predict_instance()
