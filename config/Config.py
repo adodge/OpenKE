@@ -27,17 +27,10 @@ class Config(object):
 		self.in_path = None
 		self.out_path = None
 		self.bern = 0
-		self.hidden_size = 100
-		self.ent_size = self.hidden_size
-		self.rel_size = self.hidden_size
 		self.train_times = 0
-		self.margin = 1.0
 		self.nbatches = 100
-		self.negative_ent = 1
-		self.negative_rel = 0
 		self.workThreads = 1
 		self.alpha = 0.001
-		self.lmbda = 0.000
 		self.log_on = 1
 		self.exportName = None
 		self.importName = None
@@ -103,12 +96,12 @@ class Config(object):
 			self.lib.setWorkThreads(self.workThreads)
 			self.lib.randReset()
 			self.lib.importTrainFiles()
-			self.relTotal = self.lib.getRelationTotal()
-			self.entTotal = self.lib.getEntityTotal()
+			self.relTotal = self.lib.getRelationTotal() # XXX
+			self.entTotal = self.lib.getEntityTotal() # XXX
 			self.trainTotal = self.lib.getTrainTotal()
 			self.testTotal = self.lib.getTestTotal()
 			self.validTotal = self.lib.getValidTotal()
-			self.batch_size = int(self.lib.getTrainTotal() / self.nbatches)
+			self.batch_size = int(self.lib.getTrainTotal() / self.nbatches) # XXX
 			self.batch_seq_size = self.batch_size * (1 + self.negative_ent + self.negative_rel)
 			self.batch_h = np.zeros(self.batch_size * (1 + self.negative_ent + self.negative_rel), dtype = np.int64)
 			self.batch_t = np.zeros(self.batch_size * (1 + self.negative_ent + self.negative_rel), dtype = np.int64)
@@ -128,9 +121,6 @@ class Config(object):
 
 	def get_rel_total(self):
 		return self.relTotal
-
-	def set_lmbda(self, lmbda):
-		self.lmbda = lmbda
 
 	def set_optimizer(self, optimizer):
 		self.optimizer = optimizer
@@ -159,34 +149,14 @@ class Config(object):
 	def set_bern(self, bern):
 		self.bern = bern
 
-	def set_dimension(self, dim):
-		self.hidden_size = dim
-		self.ent_size = dim
-		self.rel_size = dim
-
-	def set_ent_dimension(self, dim):
-		self.ent_size = dim
-
-	def set_rel_dimension(self, dim):
-		self.rel_size = dim
-
 	def set_train_times(self, times):
 		self.train_times = times
 
 	def set_nbatches(self, nbatches):
 		self.nbatches = nbatches
 
-	def set_margin(self, margin):
-		self.margin = margin
-
 	def set_work_threads(self, threads):
 		self.workThreads = threads
-
-	def set_ent_neg_rate(self, rate):
-		self.negative_ent = rate
-
-	def set_rel_neg_rate(self, rate):
-		self.negative_rel = rate
 
 	def set_import_files(self, path):
 		self.importName = path
