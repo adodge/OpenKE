@@ -20,14 +20,34 @@ class ComplEx(Model):
         super().__init__(**kwargs)
 
 	def embedding_def(self):
-		self.ent1_embeddings = tf.get_variable(name = "ent1_embeddings", shape = [self.n_entities, self.hidden_size], initializer = tf.contrib.layers.xavier_initializer(uniform = True))
-		self.rel1_embeddings = tf.get_variable(name = "rel1_embeddings", shape = [self.n_relations, self.hidden_size], initializer = tf.contrib.layers.xavier_initializer(uniform = True))
-		self.ent2_embeddings = tf.get_variable(name = "ent2_embeddings", shape = [self.n_entities, self.hidden_size], initializer = tf.contrib.layers.xavier_initializer(uniform = True))
-		self.rel2_embeddings = tf.get_variable(name = "rel2_embeddings", shape = [self.n_relations, self.hidden_size], initializer = tf.contrib.layers.xavier_initializer(uniform = True))
+        '''
+        Create variables for the model parameters
+        '''
+		self.ent1_embeddings = tf.get_variable(
+                name="ent1_embeddings",
+                shape=[self.n_entities, self.hidden_size],
+                initializer=tf.contrib.layers.xavier_initializer(uniform = True))
+
+		self.rel1_embeddings = tf.get_variable(
+                name="rel1_embeddings",
+                shape=[self.n_relations, self.hidden_size],
+                initializer=tf.contrib.layers.xavier_initializer(uniform = True))
+
+		self.ent2_embeddings = tf.get_variable(
+                name="ent2_embeddings",
+                shape=[self.n_entities, self.hidden_size],
+                initializer=tf.contrib.layers.xavier_initializer(uniform = True))
+
+		self.rel2_embeddings = tf.get_variable(
+                name="rel2_embeddings",
+                shape=[self.n_relations, self.hidden_size],
+                initializer=tf.contrib.layers.xavier_initializer(uniform = True))
+
 		self.parameter_lists = {"ent_re_embeddings":self.ent1_embeddings, \
 								"ent_im_embeddings":self.ent2_embeddings, \
 								"rel_re_embeddings":self.rel1_embeddings, \
 								"rel_im_embeddings":self.rel2_embeddings}
+
 	def _calc(self, e1_h, e2_h, e1_t, e2_t, r1, r2):
 		return e1_h * e1_t * r1 + e2_h * e2_t * r1 + e1_h * e2_t * r2 - e2_h * e1_t * r2
 

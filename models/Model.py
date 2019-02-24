@@ -82,20 +82,14 @@ class Trainer(
 
 class Model(object):
     '''
-    A Model is the chunk of a TF graph that implements one of the graph
-    embedding methods.  The training, saving, etc, take place in the
-    Trainer class.
-
-    Separating these concerns is, I think, a tensorflow idiom to make it easier
-    to combine multiple models into one computation graph to optimize it all
-    together.
-
-    Normally, I think we would want to arrange it so that we initialize the
-    model and all its parameters when we __init__ this class.  Then we have
-    methods on that instance to actually create bits of computation graph, with
-    inputs passed in and returning the outputs.
+    A Model object represents a single instance of one of these embedding
+    models.  When the object is initialized, it defines the shared parameters.
+    It then exposes methods for constructing computation graphs using these
+    parameters for training and testing.
 
     This lets us share parameters and do things like multi-objective training.
+
+    Example ideal interactions:
 
     # Instantiates the parameters
     graph_embedding = TransE(n_entities=1000, n_relations=20)
@@ -104,36 +98,44 @@ class Model(object):
     loss = graph_embedding.loss(inputs,batch_size=5000)
     vectors = graph_embedding.embed(inputs)
 
-    Note this is not how it is in the base project, so some reworking is
-    needed.
+    # Dump the parameters to a file
+    # (Dumps both the model parameters and hyperparameters)
+    graph_embedding.dump(filename)
+
+    # Load a model from a file
+    X = TransE.load(filename)
     '''
+
 	def __init__(self,
             n_entities:int,
             n_relations:int,
             batch_size:int=5000,
             n_negative:int=1,
 
-        # Number of entities in the training data
+        # Number of entities in the training data (all entity ids should be
+        # less than this number)
         self.n_entities = n_entities
-        # Number of relations in the training data
+        # Number of relations in the training data (all relation ids should be
+        # less than this number)
         self.n_relations = n_relations
-        # Training batch size
+        # Training batch size XXX move to loss method
         self.batch_size = batch_size
-        # Number of negative examples per positive example
+        # Number of negative examples per positive example XXX move to loss method
         self.n_negative = n_negative
 
-        # Construct TF graphs
-		with tf.name_scope("input"):
-			self.input_def()
-
+        # Allocate and define the model parameters
 		with tf.name_scope("embedding"):
 			self.embedding_def()
 
-		with tf.name_scope("loss"):
-			self.loss_def()
+        # Construct TF graphs
+        #with tf.name_scope("input"):
+        #	self.input_def()
 
-		with tf.name_scope("predict"):
-			self.predict_def()
+        #with tf.name_scope("loss"):
+        #   self.loss_def()
+
+        #with tf.name_scope("predict"):
+        #   self.predict_def()
 
     @property
     def batch_seq_size(self):

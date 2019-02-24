@@ -19,15 +19,26 @@ class TransE(Model):
 
         super().__init__(**kwargs)
 
-	def _calc(self, h, t, r):
-		return abs(h + r - t)
-
 	def embedding_def(self):
-		#Defining required parameters of the model, including embeddings of entities and relations
-		self.ent_embeddings = tf.get_variable(name = "ent_embeddings", shape = [self.n_entities, self.hidden_size], initializer = tf.contrib.layers.xavier_initializer(uniform = False))
-		self.rel_embeddings = tf.get_variable(name = "rel_embeddings", shape = [self.n_relations, self.hidden_size], initializer = tf.contrib.layers.xavier_initializer(uniform = False))
+        '''
+        Create variables for the model parameters
+        '''
+
+		self.ent_embeddings = tf.get_variable(
+                name="ent_embeddings",
+                shape=[self.n_entities, self.hidden_size],
+                initializer=tf.contrib.layers.xavier_initializer(uniform = False))
+
+		self.rel_embeddings = tf.get_variable(
+                name="rel_embeddings",
+                shape=[self.n_relations, self.hidden_size],
+                initializer=tf.contrib.layers.xavier_initializer(uniform = False))
+
 		self.parameter_lists = {"ent_embeddings":self.ent_embeddings, \
 								"rel_embeddings":self.rel_embeddings}
+
+	def _calc(self, h, t, r):
+		return abs(h + r - t)
 
 	def loss_def(self):
 		#To get positive triples and negative triples for training

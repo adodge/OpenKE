@@ -24,10 +24,23 @@ class DistMult(Model):
 		return h * r * t
 
 	def embedding_def(self):
-		self.ent_embeddings = tf.get_variable(name = "ent_embeddings", shape = [self.n_entities, self.hidden_size], initializer = tf.contrib.layers.xavier_initializer(uniform = True))
-		self.rel_embeddings = tf.get_variable(name = "rel_embeddings", shape = [self.n_relations, self.hidden_size], initializer = tf.contrib.layers.xavier_initializer(uniform = True))
+        '''
+        Create variables for the model parameters
+        '''
+
+		self.ent_embeddings = tf.get_variable(
+                name="ent_embeddings",
+                shape=[self.n_entities, self.hidden_size],
+                initializer=tf.contrib.layers.xavier_initializer(uniform = True))
+
+		self.rel_embeddings = tf.get_variable(
+                name="rel_embeddings",
+                shape=[self.n_relations, self.hidden_size],
+                initializer=tf.contrib.layers.xavier_initializer(uniform = True))
+
 		self.parameter_lists = {"ent_embeddings":self.ent_embeddings, \
 								"rel_embeddings":self.rel_embeddings}
+
 	def loss_def(self):
 		#To get positive triples and negative triples for training
 		#To get labels for the triples, positive triples as 1 and negative triples as -1

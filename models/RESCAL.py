@@ -24,9 +24,19 @@ class RESCAL(Model):
 		return h * tf.matmul(r, t)
 
 	def embedding_def(self):
-		#Defining required parameters of the model, including embeddings of entities and relations
-		self.ent_embeddings = tf.get_variable(name = "ent_embeddings", shape = [self.n_entities, self.hidden_size], initializer = tf.contrib.layers.xavier_initializer(uniform = False))
-		self.rel_matrices = tf.get_variable(name = "rel_matrices", shape = [self.n_relations, self.hidden_size * self.hidden_size], initializer = tf.contrib.layers.xavier_initializer(uniform = False))
+        '''
+        Create variables for the model parameters
+        '''
+		self.ent_embeddings = tf.get_variable(
+                name="ent_embeddings",
+                shape=[self.n_entities, self.hidden_size],
+                initializer=tf.contrib.layers.xavier_initializer(uniform = False))
+
+		self.rel_matrices = tf.get_variable(
+                name="rel_matrices",
+                shape=[self.n_relations, self.hidden_size * self.hidden_size],
+                initializer=tf.contrib.layers.xavier_initializer(uniform = False))
+
 		self.parameter_lists = {"ent_embeddings":self.ent_embeddings, \
 								"rel_matrices":self.rel_matrices}
 	def loss_def(self):
