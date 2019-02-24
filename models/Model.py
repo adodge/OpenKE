@@ -131,9 +131,6 @@ class Model(object):
         #with tf.name_scope("input"):
         #    self.input_def()
 
-        #with tf.name_scope("loss"):
-        #   self.loss_def()
-
         #with tf.name_scope("predict"):
         #   self.predict_def()
 
@@ -168,9 +165,6 @@ class Model(object):
         }
 
     def embedding_def(self):
-        raise NotImplementedError
-
-    def loss_def(self):
         raise NotImplementedError
 
     def predict_def(self):
