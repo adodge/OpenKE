@@ -40,7 +40,7 @@ class TransE(Model):
     def _calc(self, h, t, r):
         return abs(h + r - t)
 
-    def loss(self, batch_h, batch_t, batch_r, batch_size, n_negative):
+    def loss_batch(self, batch_h, batch_t, batch_r, batch_size, n_negative):
 
         inputs = self.split_inputs( batch_h, batch_t, batch_r, batch_size,
                 n_negative)

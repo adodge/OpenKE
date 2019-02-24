@@ -52,7 +52,7 @@ class TransR(Model):
                                 "rel_embeddings":self.rel_embeddings, \
                                 "transfer_matrix":self.transfer_matrix}
 
-    def loss(self, batch_h, batch_t, batch_r, batch_size, n_negative):
+    def loss_batch(self, batch_h, batch_t, batch_r, batch_size, n_negative):
 
         inputs = self.split_inputs( batch_h, batch_t, batch_r, batch_size,
                 n_negative)

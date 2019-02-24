@@ -41,7 +41,7 @@ class DistMult(Model):
         self.parameter_lists = {"ent_embeddings":self.ent_embeddings, \
                                 "rel_embeddings":self.rel_embeddings}
 
-    def loss(self, h, t, r, y):
+    def loss_y(self, h, t, r, y):
         #The shapes of h, t, r, y are (batch_size, 1 + n_negative)
         #Embedding entities and relations of triples
         e_h = tf.nn.embedding_lookup(self.ent_embeddings, h)

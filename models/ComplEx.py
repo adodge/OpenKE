@@ -51,7 +51,7 @@ class ComplEx(Model):
     def _calc(self, e1_h, e2_h, e1_t, e2_t, r1, r2):
         return e1_h * e1_t * r1 + e2_h * e2_t * r1 + e1_h * e2_t * r2 - e2_h * e1_t * r2
 
-    def loss(self, h, t, r, y):
+    def loss_y(self, h, t, r, y):
         #The shapes of h, t, r, y are (batch_size, 1 + n_negative)
         #Embedding entities and relations of triples
         e1_h = tf.nn.embedding_lookup(self.ent1_embeddings, h)

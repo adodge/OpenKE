@@ -39,7 +39,7 @@ class RESCAL(Model):
 
         self.parameter_lists = {"ent_embeddings":self.ent_embeddings, \
                                 "rel_matrices":self.rel_matrices}
-    def loss(self, batch_h, batch_t, batch_r, batch_size, n_negative):
+    def loss_batch(self, batch_h, batch_t, batch_r, batch_size, n_negative):
 
         inputs = self.split_inputs( batch_h, batch_t, batch_r, batch_size, n_negative)
 

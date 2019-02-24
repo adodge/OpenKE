@@ -56,7 +56,7 @@ class TransD(Model):
                                 "ent_transfer":self.ent_transfer, \
                                 "rel_transfer":self.rel_transfer}
 
-    def loss(self, batch_h, batch_t, batch_r, batch_size, n_negative):
+    def loss_batch(self, batch_h, batch_t, batch_r, batch_size, n_negative):
 
         inputs = self.split_inputs( batch_h, batch_t, batch_r, batch_size,
                 n_negative)

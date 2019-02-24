@@ -63,7 +63,7 @@ class Analogy(Model):
     def _calc_dist(self, e_h, e_t, rel):
         return e_h * e_t * rel
     
-    def loss(self, h, t, r, y):
+    def loss_y(self, h, t, r, y):
         #The shapes of h, t, r, y are (batch_size, 1 + n_negative)
         #Embedding entities and relations of triples
         e1_h = tf.nn.embedding_lookup(self.ent1_embeddings, h)

@@ -1,4 +1,5 @@
 #coding:utf-8
+import abc
 import numpy as np
 import tensorflow as tf
 
@@ -156,3 +157,26 @@ class Model(object):
             'negative_t': negative_t,
             'negative_r': negative_r,
         }
+
+    def loss(self, batch_h, batch_t, batch_r, batch_y, batch_size, n_negative):
+        '''
+        There are two types of loss functions defined in this module.
+
+        Analogy, ComplEx, and DistMult take arguments (h,t,r,y).  The rest take
+        (h,t,r,batch_size,n_negative).
+
+        y is an aligned vector of target similarities, whereas batch_size and
+        n_negative allow the loss function to determine which (h,t,r) examples
+        are positive or negative (using the split_inputs method).
+
+        The data loader / sampling logic generates both the batch_y and
+        (batch_size, n_negative) values.  This function takes the union of
+        these arguments are delegates to the appropriate loss function for the
+        model.
+        '''
+
+        if hasattr(self, 'loss_y'):
+            return self.loss_y(batch_h, batch_t, batch_r, batch_y)
+        if hasattr(self, 'loss_batch'):
+            return self.loss_y(batch_h, batch_t, batch_r, batch_size, n_negative)
+        raise NotImplementedError("Model doesn't seem to have a loss function defined.")
