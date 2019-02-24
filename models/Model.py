@@ -2,7 +2,111 @@
 import numpy as np
 import tensorflow as tf
 
+class Trainer(
+    def __init__(cls,
+            model,
+            opt_method:str="SGD",
+            alpha:float=0.001,
+            model_params:dict=None):
+        '''
+        Create a TF graph using this model, including an optimizer, train op,
+        saver, etc.
+        '''
+		graph = tf.Graph()
+		with graph.as_default():
+			sess = tf.Session()
+			with sess.as_default():
+				initializer = tf.contrib.layers.xavier_initializer(uniform = True)
+				with tf.variable_scope("model", reuse=None, initializer = initializer):
+					trainModel = model(**model_params)
+                    elif opt_method.lower() == "adagrad":
+						optimizer = tf.train.AdagradOptimizer(learning_rate = alpha, initial_accumulator_value=1e-20)
+                    elif opt_method.lower() == "adadelta":
+						optimizer = tf.train.AdadeltaOptimizer(alpha)
+                    elif opt_method.lower() == "adam":
+						optimizer = tf.train.AdamOptimizer(alpha)
+                    elif opt_method.lower() == "sgd":
+						optimizer = tf.train.GradientDescentOptimizer(alpha)
+                    else:
+                        raise ValueError("Unknown opt_method: %s" % opt_method)
+					grads_and_vars = optimizer.compute_gradients(trainModel.loss)
+					train_op = optimizer.apply_gradients(grads_and_vars)
+				saver = tf.train.Saver()
+				sess.run(tf.initialize_all_variables())
+
+        self.graph = graph
+        self.sess = sess
+        self.model = trainModel
+        self.optimizer = optimizer
+        self.grads_and_vars = grads_and_vars
+        self.train_op = train_op
+        self.saver = saver
+
+	def train_step(self, batch_h, batch_t, batch_r, batch_y):
+		feed_dict = {
+			self.model.batch_h: batch_h,
+			self.model.batch_t: batch_t,
+			self.model.batch_r: batch_r,
+			self.model.batch_y: batch_y
+		}
+		_, loss = self.sess.run([self.train_op, self.model.loss], feed_dict)
+		return loss
+
+	def run(self):
+		with self.graph.as_default():
+			with self.sess.as_default():
+				for times in range(self.train_times):
+					res = 0.0
+					for batch in range(self.nbatches):
+						self.sampling()
+						res += self.train_step(self.batch_h, self.batch_t, self.batch_r, self.batch_y)
+					if self.log_on:
+						print(times)
+						print(res)
+					if self.exportName != None and (self.export_steps!=0 and times % self.export_steps == 0):
+						self.save_tensorflow()
+				if self.exportName != None:
+					self.save_tensorflow()
+				if self.out_path != None:
+					self.save_parameters(self.out_path)
+
+	def save_tensorflow(self, exportName):
+		with self.graph.as_default():
+			with self.sess.as_default():
+				self.saver.save(self.sess, exportName)
+
+	def restore_tensorflow(self, importName):
+		with self.graph.as_default():
+			with self.sess.as_default():
+				self.saver.restore(self.sess, importName)
+
 class Model(object):
+    '''
+    A Model is the chunk of a TF graph that implements one of the graph
+    embedding methods.  The training, saving, etc, take place in the
+    Trainer class.
+
+    Separating these concerns is, I think, a tensorflow idiom to make it easier
+    to combine multiple models into one computation graph to optimize it all
+    together.
+
+    Normally, I think we would want to arrange it so that we initialize the
+    model and all its parameters when we __init__ this class.  Then we have
+    methods on that instance to actually create bits of computation graph, with
+    inputs passed in and returning the outputs.
+
+    This lets us share parameters and do things like multi-objective training.
+
+    # Instantiates the parameters
+    graph_embedding = TransE(n_entities=1000, n_relations=20)
+
+    # Instantiates computation nodes
+    loss = graph_embedding.loss(inputs,batch_size=5000)
+    vectors = graph_embedding.embed(inputs)
+
+    Note this is not how it is in the base project, so some reworking is
+    needed.
+    '''
 	def __init__(self,
             n_entities:int,
             n_relations:int,
@@ -30,47 +134,6 @@ class Model(object):
 
 		with tf.name_scope("predict"):
 			self.predict_def()
-
-    @classmethod
-    def create_graph(cls,
-            opt_method:str="SGD",
-            alpha:float=0.001,
-            **kwargs):
-        '''
-        Create a TF graph using this model, including an optimizer, train op,
-        saver, etc.
-        '''
-		graph = tf.Graph()
-		with graph.as_default():
-			sess = tf.Session()
-			with sess.as_default():
-				initializer = tf.contrib.layers.xavier_initializer(uniform = True)
-				with tf.variable_scope("model", reuse=None, initializer = initializer):
-					trainModel = cls(**kwargs)
-                    elif opt_method.lower() == "adagrad":
-						optimizer = tf.train.AdagradOptimizer(learning_rate = alpha, initial_accumulator_value=1e-20)
-                    elif opt_method.lower() == "adadelta":
-						optimizer = tf.train.AdadeltaOptimizer(alpha)
-                    elif opt_method.lower() == "adam":
-						optimizer = tf.train.AdamOptimizer(alpha)
-                    elif opt_method.lower() == "sgd":
-						optimizer = tf.train.GradientDescentOptimizer(alpha)
-                    else:
-                        raise ValueError("Unknown opt_method: %s" % opt_method)
-					grads_and_vars = optimizer.compute_gradients(trainModel.loss)
-					train_op = optimizer.apply_gradients(grads_and_vars)
-				saver = tf.train.Saver()
-				sess.run(tf.initialize_all_variables())
-
-        return {
-                'graph': graph,
-                'session': sess,
-                'model': trainModel,
-                'optimizer': optimizer,
-                'grads_and_vars': grads_and_vars,
-                'train_op': train_op,
-                'saver': saver,
-               }
 
     @property
     def batch_seq_size(self):
