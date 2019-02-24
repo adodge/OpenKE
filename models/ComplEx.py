@@ -69,13 +69,12 @@ class ComplEx(Model):
         #Calculating loss to get what the framework will optimize
         return loss_func + self.lmbda * regul_func
 
-    def predict_def(self):
-        predict_h, predict_t, predict_r = self.get_predict_instance()
+    def predict(self, predict_h, predict_t, predict_r):
         predict_h_e1 = tf.nn.embedding_lookup(self.ent1_embeddings, predict_h)
         predict_t_e1 = tf.nn.embedding_lookup(self.ent1_embeddings, predict_t)
         predict_r_e1 = tf.nn.embedding_lookup(self.rel1_embeddings, predict_r)
         predict_h_e2 = tf.nn.embedding_lookup(self.ent2_embeddings, predict_h)
         predict_t_e2 = tf.nn.embedding_lookup(self.ent2_embeddings, predict_t)
         predict_r_e2 = tf.nn.embedding_lookup(self.rel2_embeddings, predict_r)
-        self.predict = -tf.reduce_sum(self._calc(predict_h_e1, predict_h_e2, predict_t_e1, predict_t_e2, predict_r_e1, predict_r_e2), 1, keep_dims = True)
+        return -tf.reduce_sum(self._calc(predict_h_e1, predict_h_e2, predict_t_e1, predict_t_e2, predict_r_e1, predict_r_e2), 1, keep_dims = True)
 

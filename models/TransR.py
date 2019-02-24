@@ -98,8 +98,7 @@ class TransR(Model):
         #Calculating loss to get what the framework will optimize
         return tf.reduce_sum(tf.maximum(p_score - n_score + self.margin, 0))
 
-    def predict_def(self):
-        predict_h, predict_t, predict_r = self.get_predict_instance()
+    def predict(self, predict_h, predict_t, predict_r):
         predict_h_e = tf.reshape(tf.nn.embedding_lookup(self.ent_embeddings, predict_h), [-1, self.ent_size, 1])
         predict_t_e = tf.reshape(tf.nn.embedding_lookup(self.ent_embeddings, predict_t), [-1, self.ent_size, 1])
         predict_r_e = tf.reshape(tf.nn.embedding_lookup(self.rel_embeddings, predict_r), [-1, self.rel_size])
@@ -107,4 +106,4 @@ class TransR(Model):
         h_e = tf.reshape(self._transfer(predict_matrix, predict_h_e), [-1, self.rel_size])
         t_e = tf.reshape(self._transfer(predict_matrix, predict_t_e), [-1, self.rel_size])
         r_e = predict_r_e
-        self.predict = tf.reduce_sum(self._calc(h_e, t_e, r_e), 1, keep_dims = True)
+        return tf.reduce_sum(self._calc(h_e, t_e, r_e), 1, keep_dims = True)

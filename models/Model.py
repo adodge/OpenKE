@@ -127,13 +127,6 @@ class Model(object):
         with tf.name_scope("embedding"):
             self.embedding_def()
 
-        # Construct TF graphs
-        #with tf.name_scope("input"):
-        #    self.input_def()
-
-        #with tf.name_scope("predict"):
-        #   self.predict_def()
-
     def split_inputs(self, batch_h, batch_t, batch_r, batch_size, n_negative):
         '''
         Input batches are passed in as three vectors of integers and a vector
@@ -163,9 +156,3 @@ class Model(object):
             'negative_t': negative_t,
             'negative_r': negative_r,
         }
-
-    def embedding_def(self):
-        raise NotImplementedError
-
-    def predict_def(self):
-        raise NotImplementedError
