@@ -56,3 +56,7 @@ with graph.as_default():
                 res += epoch_loss
 
             print(epoch, res)
+
+# TODO
+# Testing
+# Model dumping / loading
