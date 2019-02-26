@@ -49,7 +49,7 @@ class DistMult(Model):
         e_r = tf.nn.embedding_lookup(self.rel_embeddings, r)
 
         #Calculating score functions for all positive triples and negative triples
-        res = tf.reduce_sum(self._calc(e_h, e_t, e_r), 1, keep_dims = False)
+        res = tf.reduce_sum(self._calc(e_h, e_t, e_r), 1, keepdims = False)
         loss_func = tf.reduce_mean(tf.nn.softplus(- y * res))
         regul_func = tf.reduce_mean(e_h ** 2) + tf.reduce_mean(e_t ** 2) + tf.reduce_mean(e_r ** 2)
 
@@ -61,4 +61,4 @@ class DistMult(Model):
         predict_h_e = tf.nn.embedding_lookup(self.ent_embeddings, predict_h)
         predict_t_e = tf.nn.embedding_lookup(self.ent_embeddings, predict_t)
         predict_r_e = tf.nn.embedding_lookup(self.rel_embeddings, predict_r)
-        return -tf.reduce_sum(self._calc(predict_h_e, predict_t_e, predict_r_e), 1, keep_dims = True)
+        return -tf.reduce_sum(self._calc(predict_h_e, predict_t_e, predict_r_e), 1, keepdims = True)

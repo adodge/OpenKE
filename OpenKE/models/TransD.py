@@ -22,7 +22,7 @@ class TransD(Model):
         super().__init__(**kwargs)
 
     def _transfer(self, e, t, r):
-        return tf.nn.l2_normalize(e + tf.reduce_sum(e * t, 1, keep_dims = True) * r, -1)
+        return tf.nn.l2_normalize(e + tf.reduce_sum(e * t, 1, keepdims = True) * r, -1)
 
     def _calc(self, h, t, r):
         return abs(h + r - t)
@@ -98,8 +98,8 @@ class TransD(Model):
 
         #The shape of p_score is (batch_size, 1)
         #The shape of n_score is (batch_size, 1)
-        p_score =  tf.reduce_sum(tf.reduce_mean(_p_score, 1, keep_dims = False), 1, keep_dims = True)
-        n_score =  tf.reduce_sum(tf.reduce_mean(_n_score, 1, keep_dims = False), 1, keep_dims = True)
+        p_score =  tf.reduce_sum(tf.reduce_mean(_p_score, 1, keepdims = False), 1, keepdims = True)
+        n_score =  tf.reduce_sum(tf.reduce_mean(_n_score, 1, keepdims = False), 1, keepdims = True)
 
         #Calculating loss to get what the framework will optimize
         return tf.reduce_sum(tf.maximum(p_score - n_score + self.margin, 0))
@@ -114,4 +114,4 @@ class TransD(Model):
         h_e = self._transfer(predict_h_e, predict_h_t, predict_r_t)
         t_e = self._transfer(predict_t_e, predict_t_t, predict_r_t)
         r_e = predict_r_e
-        return tf.reduce_sum(self._calc(h_e, t_e, r_e), 1, keep_dims = True)
+        return tf.reduce_sum(self._calc(h_e, t_e, r_e), 1, keepdims = True)

@@ -22,7 +22,7 @@ class TransH(Model):
         super().__init__(**kwargs)
 
     def _transfer(self, e, n):
-        return e - tf.reduce_sum(e * n, 1, keep_dims = True) * n
+        return e - tf.reduce_sum(e * n, 1, keepdims = True) * n
 
     def _calc(self, h, t, r):
         return abs(h + r - t)
@@ -101,8 +101,8 @@ class TransH(Model):
 
         #The shape of p_score is (batch_size, 1)
         #The shape of n_score is (batch_size, 1)
-        p_score =  tf.reduce_sum(tf.reduce_mean(_p_score, 0, keep_dims = False), 1, keep_dims = True)
-        n_score =  tf.reduce_sum(tf.reduce_mean(_n_score, 0, keep_dims = False), 1, keep_dims = True)
+        p_score =  tf.reduce_sum(tf.reduce_mean(_p_score, 0, keepdims = False), 1, keepdims = True)
+        n_score =  tf.reduce_sum(tf.reduce_mean(_n_score, 0, keepdims = False), 1, keepdims = True)
 
         #Calculating loss to get what the framework will optimize
         return tf.reduce_sum(tf.maximum(p_score - n_score + self.margin, 0))
@@ -121,4 +121,4 @@ class TransH(Model):
         h_e = self._transfer(predict_h_e, predict_norm)
         t_e = self._transfer(predict_t_e, predict_norm)
         r_e = predict_r_e
-        return tf.reduce_sum(self._calc(h_e, t_e, r_e), 1, keep_dims = True)
+        return tf.reduce_sum(self._calc(h_e, t_e, r_e), 1, keepdims = True)
