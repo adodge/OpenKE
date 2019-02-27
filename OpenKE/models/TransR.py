@@ -48,9 +48,9 @@ class TransR(Model):
                 shape = [self.n_relations, self.ent_size * self.rel_size],
                 initializer = tf.contrib.layers.xavier_initializer(uniform = False))
 
-        self.parameter_lists = {"ent_embeddings":self.ent_embeddings, \
+        self.parameter_lists.update({"ent_embeddings":self.ent_embeddings, \
                                 "rel_embeddings":self.rel_embeddings, \
-                                "transfer_matrix":self.transfer_matrix}
+                                "transfer_matrix":self.transfer_matrix})
 
     def loss_batch(self, batch_h, batch_t, batch_r, batch_size, n_negative):
 

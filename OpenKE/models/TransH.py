@@ -46,9 +46,9 @@ class TransH(Model):
                 shape = [self.n_entities, self.hidden_size],
                 initializer = tf.contrib.layers.xavier_initializer(uniform = False))
 
-        self.parameter_lists = {"ent_embeddings":self.ent_embeddings, \
+        self.parameter_lists.update({"ent_embeddings":self.ent_embeddings, \
                                 "rel_embeddings":self.rel_embeddings, \
-                                "normal_vectors":self.normal_vectors}
+                                "normal_vectors":self.normal_vectors})
 
     def loss_batch(self, batch_h, batch_t, batch_r, batch_size, n_negative):
 

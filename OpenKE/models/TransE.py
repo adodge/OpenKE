@@ -34,8 +34,7 @@ class TransE(Model):
                 shape=[self.n_relations, self.hidden_size],
                 initializer=tf.contrib.layers.xavier_initializer(uniform = False))
 
-        self.parameter_lists = {"ent_embeddings":self.ent_embeddings, \
-                                "rel_embeddings":self.rel_embeddings}
+        self.parameter_lists.update({"ent_embeddings":self.ent_embeddings,"rel_embeddings":self.rel_embeddings})
 
     def _calc(self, h, t, r):
         return abs(h + r - t)

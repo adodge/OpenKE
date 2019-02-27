@@ -160,3 +160,76 @@ class DataLoader:
                 self.sample_arrays['t'][0],
                 self.sample_arrays['r'][0],
                 self.sample_arrays['y'][0])
+
+    def test_link_prediction(self, predict_func):
+        '''
+        predict_func should take h,t,r arrays and return the score given by the
+        model for each entry.
+        '''
+        if not hasattr(self, 'tests_init') or not self.tests_init:
+            self.lib.importTestFiles()
+            self.lib.importTypeFiles()
+            self.tests_init = True
+
+        # Create temporary arrays for communication
+        h = allocate_array(self.n_entities, np.int64)
+        t = allocate_array(self.n_entities, np.int64)
+        r = allocate_array(self.n_entities, np.int64)
+
+        total = self.n_test_samples
+        for times in range(total):
+            self.lib.getHeadBatch(h[1],t[1],r[1])
+            prediction = predict_func(h[0],t[0],r[0])
+            self.lib.testHead(prediction.__array_interface__['data'][0])
+
+            self.lib.getTailBatch(h[1],t[1],r[1])
+            prediction = predict_func(h[0],t[0],r[0])
+            self.lib.testTail(prediction.__array_interface__['data'][0])
+        
+        self.lib.test_link_prediction()
+        # XXX TODO This function doesn't really reset itself in the C code, so
+        # I think we can only call it once.
+    
+    def test_triple_classification(self, predict_func):
+        '''
+        predict_func should take h,t,r arrays and return the score given by the
+        model for each entry.
+        '''
+        if not hasattr(self, 'tests_init') or not self.tests_init:
+            self.lib.importTestFiles()
+            self.lib.importTypeFiles()
+            self.tests_init = True
+
+        # Create temporary arrays for communication
+        h_pos = allocate_array(self.n_entities, np.int64)
+        t_pos = allocate_array(self.n_entities, np.int64)
+        r_pos = allocate_array(self.n_entities, np.int64)
+        h_neg = allocate_array(self.n_entities, np.int64)
+        t_neg = allocate_array(self.n_entities, np.int64)
+        r_neg = allocate_array(self.n_entities, np.int64)
+        rel_thresh = allocate_array(self.n_relations, np.float32)
+
+        self.lib.getValidBatch(
+                h_pos[1],t_pos[1],r_pos[1],
+                h_neg[1],t_neg[1],r_neg[1])
+
+        pred_pos = predict_func(h_pos[0],t_pos[0],r_pos[0])
+        pred_neg = predict_func(h_neg[0],t_neg[0],r_neg[0])
+
+        pred_pos_addr = pred_pos.__array_interface__['data'][0]
+        pred_neg_addr = pred_neg.__array_interface__['data'][0]
+
+        self.lib.getBestThreshold(rel_thresh[1], pred_pos_addr, pred_neg_addr)
+        
+        self.lib.getTestBatch(
+                h_pos[1],t_pos[1],r_pos[1],
+                h_neg[1],t_neg[1],r_neg[1])
+
+        pred_pos = predict_func(h_pos[0],t_pos[0],r_pos[0])
+        pred_neg = predict_func(h_neg[0],t_neg[0],r_neg[0])
+
+        pred_pos_addr = pred_pos.__array_interface__['data'][0]
+        pred_neg_addr = pred_neg.__array_interface__['data'][0]
+
+        self.lib.test_triple_classification(
+                rel_thresh[1], pred_pos_addr, pred_neg_addr)

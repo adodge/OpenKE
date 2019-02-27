@@ -39,6 +39,8 @@ class Model(object):
         # less than this number)
         self.n_relations = n_relations
 
+        self.parameter_lists = {}
+
         # Allocate and define the model parameters
         with tf.name_scope("embedding"):
             self.embedding_def()
@@ -98,3 +100,12 @@ class Model(object):
 
     def predict(self, predict_h, predict_t, predict_r):
         raise NotImplementedError
+
+    def parameters(self, session):
+        '''
+        Return the parameter values as a dictionary of numpy arrays
+        '''
+        out = {}
+        for key,node in self.parameter_lists.items():
+            out[key] = session.run(node)
+        return out

@@ -1,10 +1,16 @@
 import OpenKE
 import tensorflow as tf
 import os
+import json
 
-n_epochs = 1000
+n_epochs = 2
 optimizer_alpha = 0.001
 model_class = OpenKE.models.TransE
+
+save_dir = 'output'
+save_steps = 0
+
+os.makedirs(save_dir, exist_ok=True)
 
 data = OpenKE.DataLoader(data_path='./benchmarks/FB15K')
 
@@ -55,7 +61,35 @@ with graph.as_default():
                 res += epoch_loss
 
             print(epoch, res)
+            if save_steps and epoch % save_steps == 0:
+                saver.save(sess, os.path.join(save_dir, 'intermediate.epoch%d.tf' % epoch))
+        
+        saver.save(sess, os.path.join(save_dir, 'final.tf'))
 
+        # Save model parameters
+        with open(os.path.join(save_dir, "params.json"), 'w') as fd:
+            json.dump({k:v.tolist() for k,v in model.parameters(sess).items()}, fd)
+
+        # Test the model
+        test_placeholders = {
+            'h': tf.placeholder(tf.int64, [None]),
+            't': tf.placeholder(tf.int64, [None]),
+            'r': tf.placeholder(tf.int64, [None]),
+        }
+        predict = model.predict(
+                test_placeholders['h'],
+                test_placeholders['t'],
+                test_placeholders['r'])
+
+        def predict_fn(h,t,r):
+            return sess.run(predict, {
+                    test_placeholders['h']:h,
+                    test_placeholders['t']:t,
+                    test_placeholders['r']:r})
+
+        data.test_link_prediction(predict_fn)
+        data.test_triple_classification(predict_fn)
+    
 # TODO
 # Testing using the dataloader
 # Model dumping / loading

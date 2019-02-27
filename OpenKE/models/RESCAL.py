@@ -37,8 +37,8 @@ class RESCAL(Model):
                 shape=[self.n_relations, self.hidden_size * self.hidden_size],
                 initializer=tf.contrib.layers.xavier_initializer(uniform = False))
 
-        self.parameter_lists = {"ent_embeddings":self.ent_embeddings, \
-                                "rel_matrices":self.rel_matrices}
+        self.parameter_lists.update({"ent_embeddings":self.ent_embeddings, \
+                                "rel_matrices":self.rel_matrices})
     def loss_batch(self, batch_h, batch_t, batch_r, batch_size, n_negative):
 
         inputs = self.split_inputs( batch_h, batch_t, batch_r, batch_size, n_negative)
