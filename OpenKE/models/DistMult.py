@@ -18,6 +18,7 @@ class DistMult(Model):
         self.hidden_size = hidden_size
 
         super().__init__(**kwargs)
+        self.args.extend(['lmbda', 'hidden_size'])
 
     
     def _calc(self, h, t, r):

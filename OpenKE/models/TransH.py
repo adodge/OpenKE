@@ -20,6 +20,7 @@ class TransH(Model):
         self.margin = margin
 
         super().__init__(**kwargs)
+        self.args.extend(['margin', 'hidden_size', 'rel_size'])
 
     def _transfer(self, e, n):
         return e - tf.reduce_sum(e * n, 1, keepdims = True) * n

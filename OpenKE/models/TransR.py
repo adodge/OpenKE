@@ -22,6 +22,7 @@ class TransR(Model):
         self.margin = margin
 
         super().__init__(**kwargs)
+        self.args.extend(['margin', 'hidden_size', 'rel_size', 'ent_size'])
 
     def _transfer(self, transfer_matrix, embeddings):
         return tf.batch_matmul(transfer_matrix, embeddings)

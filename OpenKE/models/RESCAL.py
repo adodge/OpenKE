@@ -18,7 +18,7 @@ class RESCAL(Model):
         self.margin = margin
 
         super().__init__(**kwargs)
-
+        self.args.extend(['margin', 'hidden_size'])
 
     def _calc(self, h, t, r):
         return h * tf.matmul(r, t)

@@ -20,6 +20,8 @@ class TransD(Model):
         self.margin = margin
 
         super().__init__(**kwargs)
+        self.args.extend(['margin', 'hidden_size'])
+
 
     def _transfer(self, e, t, r):
         return tf.nn.l2_normalize(e + tf.reduce_sum(e * t, 1, keepdims = True) * r, -1)

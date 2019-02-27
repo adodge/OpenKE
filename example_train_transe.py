@@ -1,7 +1,7 @@
 import OpenKE
 import tensorflow as tf
 import os
-import json
+import pickle
 
 n_epochs = 2
 optimizer_alpha = 0.001
@@ -12,7 +12,7 @@ save_steps = 0
 
 os.makedirs(save_dir, exist_ok=True)
 
-data = OpenKE.DataLoader(data_path='./benchmarks/FB15K')
+data = OpenKE.DataLoader(data_path='./benchmarks/WN18RR')
 
 graph = tf.Graph()
 with graph.as_default():
@@ -32,6 +32,8 @@ with graph.as_default():
             model = model_class(
                     n_entities=data.n_entities,
                     n_relations=data.n_relations)
+
+            print(model.arguments)
 
             loss = model.loss(
                     input_placeholders['h'],
@@ -67,8 +69,10 @@ with graph.as_default():
         saver.save(sess, os.path.join(save_dir, 'final.tf'))
 
         # Save model parameters
-        with open(os.path.join(save_dir, "params.json"), 'w') as fd:
-            json.dump({k:v.tolist() for k,v in model.parameters(sess).items()}, fd)
+        with open(os.path.join(save_dir, "model.pickle"), 'wb') as fd:
+            pickle.dump(model.__class__, fd)
+            pickle.dump(model.arguments, fd)
+            pickle.dump(model.parameters(sess), fd)
 
         # Test the model
         test_placeholders = {

@@ -18,6 +18,7 @@ class TransE(Model):
         self.margin = margin
 
         super().__init__(**kwargs)
+        self.args.extend(['margin', 'hidden_size'])
 
     def embedding_def(self):
         '''

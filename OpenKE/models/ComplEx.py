@@ -18,6 +18,7 @@ class ComplEx(Model):
         self.hidden_size = hidden_size
 
         super().__init__(**kwargs)
+        self.args.extend(['lmbda', 'hidden_size'])
 
     def embedding_def(self):
         '''

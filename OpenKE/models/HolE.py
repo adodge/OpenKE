@@ -18,7 +18,7 @@ class HolE(Model):
         self.margin = margin
 
         super().__init__(**kwargs)
-
+        self.args.extend(['margin', 'hidden_size'])
 
     def _cconv(self, a, b):
         return tf.ifft(tf.fft(a) * tf.fft(b)).real

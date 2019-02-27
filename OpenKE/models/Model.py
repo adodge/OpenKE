@@ -39,6 +39,7 @@ class Model(object):
         # less than this number)
         self.n_relations = n_relations
 
+        self.args = ['n_entities', 'n_relations']
         self.parameter_lists = {}
 
         # Allocate and define the model parameters
@@ -100,6 +101,16 @@ class Model(object):
 
     def predict(self, predict_h, predict_t, predict_r):
         raise NotImplementedError
+
+    @property
+    def arguments(self):
+        '''
+        Return a dictionary of the keyword arguments used to create this model.
+        '''
+        out = {}
+        for key in self.args:
+            out[key] = getattr(self,key)
+        return out
 
     def parameters(self, session):
         '''
