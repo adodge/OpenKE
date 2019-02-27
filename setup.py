@@ -13,4 +13,5 @@ setup(
             'tensorflow',
             'numpy',
             ],
-        ext_modules=[dataloader])
+        ext_modules=[dataloader],
+)

@@ -1,6 +1,7 @@
 #coding:utf-8
 import numpy as np
 import tensorflow as tf
+import pickle
 
 class Model(object):
     '''
@@ -112,11 +113,34 @@ class Model(object):
             out[key] = getattr(self,key)
         return out
 
-    def parameters(self, session):
+    @property
+    def parameters(self):
         '''
         Return the parameter values as a dictionary of numpy arrays
         '''
         out = {}
         for key,node in self.parameter_lists.items():
-            out[key] = session.run(node)
+            out[key] = tf.get_default_session().run(node)
         return out
+
+    @parameters.setter
+    def parameters(self, params):
+        for key,value in params.items():
+            self.parameter_lists[key].assign(value).eval()
+
+    def dump(self, fp):
+        with open(fp, 'wb') as fd:
+            pickle.dump(self.__class__, fd)
+            pickle.dump(self.arguments, fd)
+            pickle.dump(self.parameters, fd)
+
+    @classmethod
+    def load(cls, fp):
+        with open(fp, 'rb') as fd:
+            modelcls = pickle.load(fd)
+            args = pickle.load(fd)
+            params = pickle.load(fd)
+
+        model = modelcls(**args)
+        model.parameters = params
+        return model

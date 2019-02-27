@@ -1,7 +1,6 @@
 import OpenKE
 import tensorflow as tf
 import os
-import pickle
 
 n_epochs = 2
 optimizer_alpha = 0.001
@@ -69,33 +68,10 @@ with graph.as_default():
         saver.save(sess, os.path.join(save_dir, 'final.tf'))
 
         # Save model parameters
-        with open(os.path.join(save_dir, "model.pickle"), 'wb') as fd:
-            pickle.dump(model.__class__, fd)
-            pickle.dump(model.arguments, fd)
-            pickle.dump(model.parameters(sess), fd)
+        model.dump(os.path.join(save_dir, "model.pickle"))
 
-        # Test the model
-        test_placeholders = {
-            'h': tf.placeholder(tf.int64, [None]),
-            't': tf.placeholder(tf.int64, [None]),
-            'r': tf.placeholder(tf.int64, [None]),
-        }
-        predict = model.predict(
-                test_placeholders['h'],
-                test_placeholders['t'],
-                test_placeholders['r'])
-
-        def predict_fn(h,t,r):
-            return sess.run(predict, {
-                    test_placeholders['h']:h,
-                    test_placeholders['t']:t,
-                    test_placeholders['r']:r})
-
-        data.test_link_prediction(predict_fn)
-        data.test_triple_classification(predict_fn)
     
 # TODO
 # predict_head_entity
 # predict_tail_entity
 # predict_relation
-# Model dumping / loading
