@@ -1,5 +1,6 @@
 #coding:utf-8
 import numpy as np
+import os
 import ctypes
 
 def allocate_array(shape, dtype):
@@ -14,8 +15,8 @@ class DataLoader:
     '''
 
     def __init__(self,
-            lib_path:str,
             data_path:str,
+            lib_path:str=None,
             n_batches:int=100,
             negative_ent:int=1,
             negative_rel:int=0,
@@ -26,6 +27,23 @@ class DataLoader:
         self.negative_rel = negative_rel
         self.n_batches = n_batches
 
+        if lib_path is None:
+            # XXX This is a bit hacky
+            # Find the object file
+            import OpenKE
+            dp = os.path.dirname(OpenKE.__file__)
+            for fn in os.listdir(dp):
+                if not fn.startswith("libdataloader"): continue
+                if not fn.endswith(".so"): continue
+                break
+            else:
+                raise Exception("Can't find the data loader object file")
+            lib_path = os.path.join(dp,fn)
+
+        # The C library will segfault if the path doesn't end in a slash
+        if not data_path.endswith('/'):
+            data_path += '/'
+    
         # Load the library and configure it
         self.lib = ctypes.cdll.LoadLibrary(lib_path)
         self.lib.setInPath(ctypes.create_string_buffer(data_path.encode(), len(data_path) * 2))

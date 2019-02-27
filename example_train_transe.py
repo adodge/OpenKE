@@ -4,10 +4,9 @@ import os
 
 n_epochs = 1000
 optimizer_alpha = 0.001
+model_class = OpenKE.models.TransE
 
-data = OpenKE.DataLoader(
-        lib_path='release/Base.so',
-        data_path='./benchmarks/FB15K/')
+data = OpenKE.DataLoader(data_path='./benchmarks/FB15K')
 
 graph = tf.Graph()
 with graph.as_default():
@@ -24,7 +23,7 @@ with graph.as_default():
 
         initializer = tf.contrib.layers.xavier_initializer(uniform=True)
         with tf.variable_scope('model'):
-            model = OpenKE.models.TransE(
+            model = model_class(
                     n_entities=data.n_entities,
                     n_relations=data.n_relations)
 
@@ -58,5 +57,6 @@ with graph.as_default():
             print(epoch, res)
 
 # TODO
-# Testing
+# Testing using the dataloader
 # Model dumping / loading
+# Setup.py 
