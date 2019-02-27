@@ -91,6 +91,7 @@ with graph.as_default():
         data.test_triple_classification(predict_fn)
     
 # TODO
-# Testing using the dataloader
+# predict_head_entity
+# predict_tail_entity
+# predict_relation
 # Model dumping / loading
-# Setup.py 
