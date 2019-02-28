@@ -85,6 +85,8 @@ dumps it to a file.
 python3 openke_train.py
 ```
 
+TODO Add commandline options
+
 ### Testing
 
 This script loads the model from the other script and applies the two methods
@@ -136,11 +138,7 @@ TODO implement/document these
 
 ### OpenKE
 
-This is a fork of the OpenKE project.  Here is the information on the original
-project:
-
-More information is available on our website 
-[http://openke.thunlp.org/](http://openke.thunlp.org/)
+This is a fork of the [OpenKE](https://github.com/thunlp/OpenKE) project.
 
 If you use the code, please cite the following
 [paper](http://aclweb.org/anthology/D18-2024):
@@ -153,3 +151,18 @@ If you use the code, please cite the following
    year={2018}
  }
 ```
+
+### Embedding Models
+
+* [ComplEx](http://proceedings.mlr.press/v48/trouillon16.pdf)
+* [DistMult](https://arxiv.org/pdf/1412.6575.pdf)
+* [HolE](https://www.aaai.org/ocs/index.php/AAAI/AAAI16/paper/viewFile/12484/11828)
+* [RESCAL](http://www.icml-2011.org/papers/438_icmlpaper.pdf)
+* [TransD](http://anthology.aclweb.org/P/P15/P15-1067.pdf)
+* [TransE](http://papers.nips.cc/paper/5071-translating-embeddings-for-modeling-multi-relational-data.pdf)
+* [TransH](https://www.aaai.org/ocs/index.php/AAAI/AAAI14/paper/viewFile/8531/8546)
+* [TransR](https://www.aaai.org/ocs/index.php/AAAI/AAAI15/paper/viewFile/9571/9523/)
+
+### Benchmark Data
+
+TODO
