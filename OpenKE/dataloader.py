@@ -43,6 +43,9 @@ class DataLoader:
         # The C library will segfault if the path doesn't end in a slash
         if not data_path.endswith('/'):
             data_path += '/'
+
+        assert os.path.isdir(data_path)
+        # TODO Check for the existence and correct format of the needed files
     
         # Load the library and configure it
         self.lib = ctypes.cdll.LoadLibrary(lib_path)
