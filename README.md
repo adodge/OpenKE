@@ -97,13 +97,40 @@ python3 openke_test.py
 
 #### Link Prediction
 
-TODO Read through the test code to find out what these tests are actually
-testing.
+Link prediction aims to predict the missing h or t for a relation fact triple
+(h, r, t). In this task, for each position of missing entity, the system is
+asked to rank a set of candidate entities from the knowledge graph, instead of
+only giving one best result. For each test triple (h, r, t), we replace the
+head/tail entity by all entities in the knowledge graph, and rank these
+entities in descending order of similarity scores calculated by score function
+fr. we use two measures as our evaluation metric:
+
+* *MR* : mean rank of correct entities;
+* *MRR*: the average of the reciprocal ranks of correct entities;
+* *Hit@N* : proportion of correct entities in top-N ranked entities.
+
+TODO Describe the constraint stuff
 
 #### Triple Classificiation
 
-TODO Read through the test code to find out what these tests are actually
-testing.
+Triple classification aims to judge whether a given triple (h, r, t) is correct
+or not. This is a binary classification task. For triple classification, we set
+a relationspecific threshold δr. For a triple (h, r, t), if the dissimilarity
+score obtained by fr is below δr, the triple will be classified as positive,
+otherwise negative. δr is optimized by maximizing classification accuracies on
+the validation set.
+
+### Applying the Model
+
+TODO implement/document these
+
+#### Extracting Embeddings
+
+#### Predict Head/Tail Entity
+
+#### Predict Relation
+
+#### Classify Triple
 
 ## Citations
 
