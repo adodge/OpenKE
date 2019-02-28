@@ -1,21 +1,6 @@
 # OpenKE
 An Open-source Framework for Knowledge Embedding.
 
-More information is available on our website 
-[http://openke.thunlp.org/](http://openke.thunlp.org/)
-
-If you use the code, please cite the following
-[paper](http://aclweb.org/anthology/D18-2024):
-
-```
- @inproceedings{han2018openke,
-   title={OpenKE: An Open Toolkit for Knowledge Embedding},
-   author={Han, Xu and Cao, Shulin and Lv Xin and Lin, Yankai and Liu, Zhiyuan and Sun, Maosong and Li, Juanzi},
-   booktitle={Proceedings of EMNLP},
-   year={2018}
- }
-```
-
 ## Overview
 
 This is a fork of the [OpenKE](https://github.com/thunlp/OpenKE) project, with
@@ -98,3 +83,25 @@ testing.
 
 TODO Read through the test code to find out what these tests are actually
 testing.
+
+## Citations
+
+### OpenKE
+
+This is a fork of the OpenKE project.  Here is the information on the original
+project:
+
+More information is available on our website 
+[http://openke.thunlp.org/](http://openke.thunlp.org/)
+
+If you use the code, please cite the following
+[paper](http://aclweb.org/anthology/D18-2024):
+
+```
+ @inproceedings{han2018openke,
+   title={OpenKE: An Open Toolkit for Knowledge Embedding},
+   author={Han, Xu and Cao, Shulin and Lv Xin and Lin, Yankai and Liu, Zhiyuan and Sun, Maosong and Li, Juanzi},
+   booktitle={Proceedings of EMNLP},
+   year={2018}
+ }
+```
