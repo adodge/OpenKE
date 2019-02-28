@@ -187,8 +187,9 @@ class DataLoader:
             self.lib.testTail(prediction.__array_interface__['data'][0])
         
         self.lib.test_link_prediction()
-        # XXX TODO This function doesn't really reset itself in the C code, so
-        # I think we can only call it once.
+        # XXX TODO This relies on global variables for incrementers in the C
+        # library (e.g. lastHead), and they aren't reset at the end of the
+        # processing.  I think we can only call it once.
     
     def test_triple_classification(self, predict_func):
         '''

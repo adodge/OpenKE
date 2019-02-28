@@ -25,27 +25,76 @@ requrests for improvements made to this fork.
 
 ## Installation
 
+```
+pip3 install git+https://github.com/adodge/OpenKE.git
+```
+
 ## Data
 
-* For training, datasets contain three files:
+A dataset consists of the following:
 
-  train2id.txt: training file, the first line is the number of triples for training. Then the following lines are all in the format ***(e1, e2, rel)*** which indicates there is a relation ***rel*** between ***e1*** and ***e2*** .
-  **Note that train2id.txt contains ids from entitiy2id.txt and relation2id.txt instead of the names of the entities and relations. If you use your own datasets, please check the format of your training file. Files in the wrong format may cause segmentation fault.**
+### Entity/Relation ID maps
 
-  entity2id.txt: all entities and corresponding ids, one per line. The first line is the number of entities.
+Mapping from entity/relation names to IDs is done with TSV files.  The first
+line is the number of entries in the file, and the rest have the columns: name
+(string), id (integer)
 
-  relation2id.txt: all relations and corresponding ids, one per line. The first line is the number of relations.
+* entity2id.txt
+* relation2id.txt
 
-* For testing, datasets contain additional two files (totally five files):
+These files aren't actually used by any of the existing code, except to
+discover the number of entities and relations.  IDs should range from 0 to N
+(exclusive), where N is the number of entities/relations.
 
-  test2id.txt: testing file, the first line is the number of triples for testing. Then the following lines are all in the format ***(e1, e2, rel)*** .
 
-  valid2id.txt: validating file, the first line is the number of triples for validating. Then the following lines are all in the format ***(e1, e2, rel)*** .
+### Triples
 
-  type_constrain.txt: type constraining file, the first line is the number of relations. Then the following lines are type constraints for each relation. For example, the relation with id 1200 has 4 types of head entities, which are 3123, 1034, 58 and 5733. The relation with id 1200 has 4 types of tail entities, which are 12123, 4388, 11087 and 11088. You can get this file through **n-n.py** in folder benchmarks/FB15K.
+Triples are stored as a TSV file, where the first line is the number of triples
+in the file and the rest have the columns: head, tail, relation, where these
+are represented by entity and relation IDs.
+
+There are three files with this format:
+
+* train2id.txt
+* valid2id.txt
+* test2id.txt
+
+valid2id.txt and test2id.txt are unused during training, and are only necessary
+if you're using the testing functions.
+
+### Type constraints
+
+This is a generated file, containing the domain and range of each relation in a
+fairly esoteric format.  It's the output of the `n-n.py` script, but its
+generation should be made part of the DataLoader object at some point.
 
 ## Quick Start
 
 ### Training
 
+An example script is provided that uses the data loader, trains a model, and
+dumps it to a file.
+
+```
+python3 openke_train.py
+```
+
 ### Testing
+
+This script loads the model from the other script and applies the two methods
+of testing that are provided by the framework: link prediction and triple
+classification.
+
+```
+python3 openke_test.py
+```
+
+#### Link Prediction
+
+TODO Read through the test code to find out what these tests are actually
+testing.
+
+#### Triple Classificiation
+
+TODO Read through the test code to find out what these tests are actually
+testing.

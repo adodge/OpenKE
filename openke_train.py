@@ -2,12 +2,12 @@ import OpenKE
 import tensorflow as tf
 import os
 
-n_epochs = 2
+n_epochs = 1000
 optimizer_alpha = 0.001
 model_class = OpenKE.models.TransE
 
 save_dir = 'output'
-save_steps = 0
+save_steps = 100
 
 os.makedirs(save_dir, exist_ok=True)
 
