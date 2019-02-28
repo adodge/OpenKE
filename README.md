@@ -6,7 +6,19 @@ An Open-source Framework for Knowledge Embedding.
 This is a fork of the [OpenKE](https://github.com/thunlp/OpenKE) project, with
 the intention of exposing a more standard and reusable python module.  I'll do
 my best to sync up improvements to the master version, as well as submit pull
-requrests for improvements made to this fork.
+requests for improvements made to this fork.
+
+Major differences from the original project:
+
+* Removed the Config object to make the control flow easier to understand and
+  modify.  Model hyperparameters are moved into the model initializer.
+* Models act a bit more like Keras layers, where initializing the model
+  allocates the parameters, and then the model exposes methods for constructing
+  parts of a computation graph.  This should make it easier to reuse them as
+  part of a larger network.
+* The python wrapper for the C library should be a bit more opaque, to provide
+  an easy interface for loading and sampling data without worrying too much
+  about how it's allocating memory, etc.
 
 ## Installation
 
@@ -15,6 +27,9 @@ pip3 install git+https://github.com/adodge/OpenKE.git
 ```
 
 ## Data
+
+Several datasets are included in the benchmarks directory.  TODO Find out where
+they came from and put in a README.
 
 A dataset consists of the following:
 
@@ -51,7 +66,7 @@ if you're using the testing functions.
 
 This is a generated file, containing the domain and range of each relation in a
 fairly esoteric format.  It's the output of the `n-n.py` script, but its
-generation should be made part of the DataLoader object at some point.
+generation should be made part of the DataLoader object at some point. TODO
 
 ## Quick Start
 

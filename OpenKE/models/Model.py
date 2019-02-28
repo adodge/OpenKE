@@ -10,23 +10,8 @@ class Model(object):
     It then exposes methods for constructing computation graphs using these
     parameters for training and testing.
 
-    This lets us share parameters and do things like multi-objective training.
-
-    Example ideal interactions:
-
-    # Instantiates the parameters
-    graph_embedding = TransE(n_entities=1000, n_relations=20)
-
-    # Instantiates computation nodes
-    loss = graph_embedding.loss(inputs,batch_size=5000)
-    vectors = graph_embedding.predict(inputs)
-
-    # Dump the parameters to a file
-    # (Dumps both the model parameters and hyperparameters)
-    graph_embedding.dump(filename)
-
-    # Load a model from a file
-    X = TransE.load(filename)
+    This lets us share parameters and do things like multi-objective training,
+    or include this model as a part of a larger deep learning model.
     '''
 
     def __init__(self,
