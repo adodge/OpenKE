@@ -69,9 +69,3 @@ with graph.as_default():
 
         # Save model parameters
         model.dump(os.path.join(save_dir, "model.pickle"))
-
-    
-# TODO
-# predict_head_entity
-# predict_tail_entity
-# predict_relation

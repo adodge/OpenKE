@@ -5,9 +5,13 @@ import ctypes
 
 def allocate_array(shape, dtype):
     # Allocate a numpy array for passing data between Python and C
+    # The return value is a tuple of array, pointer to array.  The former is
+    # usable in python, and the latter is usable in C, but they refer to the
+    # same data.
     array = np.zeros(shape, dtype=dtype)
     addr = array.__array_interface__['data'][0]
     return array,addr
+    # TODO change this to return a namespace so we don't have to index
 
 class DataLoader:
     '''
