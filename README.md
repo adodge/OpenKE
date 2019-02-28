@@ -10,12 +10,18 @@ requests for improvements made to this fork.
 
 Major differences from the original project:
 
-* Removed the Config object to make the control flow easier to understand and
-  modify.  Model hyperparameters are moved into the model initializer.
+* Removed the Config object.
+  * Model hyperparameters are moved into the model initializer.
+  * Data loading and interfacing with the C library is moved into the
+    DataLoader class.
+  * Experimental setup is left up to the user of the module.  Example scripts
+    are provided.
+
 * Models act a bit more like Keras layers, where initializing the model
   allocates the parameters, and then the model exposes methods for constructing
   parts of a computation graph.  This should make it easier to reuse them as
   part of a larger network.
+
 * The python wrapper for the C library should be a bit more opaque, to provide
   an easy interface for loading and sampling data without worrying too much
   about how it's allocating memory, etc.
