@@ -59,6 +59,9 @@ class TransH(Model):
         #To get positive triples and negative triples for training
         #The shapes of pos_h, pos_t, pos_r are (batch_size, 1)
         #The shapes of neg_h, neg_t, neg_r are (batch_size, n_negative)
+
+        # FIXME I missed the in_batch=False in the original.  This looks like
+        #       it's the difference of a transpose.
         pos_h, pos_t, pos_r = inputs['positive_h'],inputs['positive_t'],inputs['positive_r']
         neg_h, neg_t, neg_r = inputs['negative_h'],inputs['negative_t'],inputs['negative_r']
 
@@ -98,7 +101,7 @@ class TransH(Model):
         _p_score = self._calc(p_h, p_t, p_r)
         _p_score = tf.reshape(_p_score, [1, -1, self.rel_size])
         _n_score = self._calc(n_h, n_t, n_r)
-        _n_score = tf.reshape(_n_score, [self.n_negative, -1, self.rel_size])
+        _n_score = tf.reshape(_n_score, [n_negative, -1, self.rel_size])
 
         #The shape of p_score is (batch_size, 1)
         #The shape of n_score is (batch_size, 1)
