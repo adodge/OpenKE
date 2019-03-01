@@ -16,19 +16,17 @@ Major differences from the original project:
     DataLoader class.
   * Experimental setup is left up to the user of the module.  Example scripts
     are provided.
-
 * Models act a bit more like Keras layers, where initializing the model
   allocates the parameters, and then the model exposes methods for constructing
   parts of a computation graph.  This should make it easier to reuse them as
   part of a larger network.
-
 * The python wrapper for the C library should be a bit more opaque, to provide
   an easy interface for loading and sampling data without worrying too much
   about how it's allocating memory, etc.
 
 ## Installation
 
-```
+```bash
 pip3 install git+https://github.com/adodge/OpenKE.git
 ```
 
@@ -74,6 +72,98 @@ This is a generated file, containing the domain and range of each relation in a
 fairly esoteric format.  It's the output of the `n-n.py` script, but its
 generation should be made part of the DataLoader object at some point. TODO
 
+## APIs
+
+### DataLoader
+
+The DataLoader class offers an optimized, consistent method of loading the
+training and test data, and also generating negative examples.  This is taken
+from the OpenKE project, with a different python interface.
+
+At its most basic, the DataLoader is initialized with the path to the dataset
+directory.  For example:
+
+```python
+import OpenKE
+data = OpenKE.DataLoader(data_path='./benchmarks/WN18RR')
+```
+
+The main interface it exposes is the `.sample()` method.  This returns four
+numpy arrays:
+
+```python
+h,t,r,y = data.sample()
+```
+
+These are in the appropriate format for sending in as training data for a
+model.
+
+The DataLoader also exposes useful information about the data, like the number
+of entities and relations, the size of the different corpus partitions, etc.
+This is useful for choosing the sizes of arrays in your model.  For example, to
+make sure the embedding matrices are the right size:
+
+```python
+model = OpenKE.models.TransE(
+    n_entities=data.n_entities,
+    n_relations=data.n_relations)
+```
+
+### Models
+
+#### Analogy
+#### ComplEx
+* [ComplEx](http://proceedings.mlr.press/v48/trouillon16.pdf)
+#### DistMult
+* [DistMult](https://arxiv.org/pdf/1412.6575.pdf)
+#### HolE
+* [HolE](https://www.aaai.org/ocs/index.php/AAAI/AAAI16/paper/viewFile/12484/11828)
+#### RESCAL
+* [RESCAL](http://www.icml-2011.org/papers/438_icmlpaper.pdf)
+#### TransD
+* [TransD](http://anthology.aclweb.org/P/P15/P15-1067.pdf)
+#### TransE
+* [TransE](http://papers.nips.cc/paper/5071-translating-embeddings-for-modeling-multi-relational-data.pdf)
+#### TransH
+* [TransH](https://www.aaai.org/ocs/index.php/AAAI/AAAI14/paper/viewFile/8531/8546)
+#### TransR
+* [TransR](https://www.aaai.org/ocs/index.php/AAAI/AAAI15/paper/viewFile/9571/9523/)
+
+### Using the Model
+
+TODO implement/document these
+
+#### Extracting Embeddings
+
+A Model object exposes a property called `.parameters` which will be a
+dictionary mapping names onto numpy arrays.  The parameters will be particular
+to the specific model, but there will usually be parameters named
+`ent_embeddings` and `rel_embeddings` which contain the embeddings for entities
+and relations.
+
+```python
+import OpenKE
+import tensorflow as tf
+
+graph = tf.Graph()
+with graph.as_default():
+    sess = tf.Session()
+    with sess.as_default():
+        model = OpenKE.models.Model.load('path_to_model.pickle')
+
+        params = model.parameters
+        entity_embeddings = params['ent_embeddings']
+
+        # You can also set the model parameters
+        model.parameters = {'ent_embeddings': np.zeros_like(entity_embeddings)}
+```
+
+#### Predict Head/Tail Entity
+
+#### Predict Relation
+
+#### Classify Triple
+
 ## Quick Start
 
 ### Training
@@ -81,11 +171,11 @@ generation should be made part of the DataLoader object at some point. TODO
 An example script is provided that uses the data loader, trains a model, and
 dumps it to a file.
 
-```
+```bash
 python3 openke_train.py
 ```
 
-TODO Add commandline options
+TODO Add cli options
 
 ### Testing
 
@@ -93,9 +183,11 @@ This script loads the model from the other script and applies the two methods
 of testing that are provided by the framework: link prediction and triple
 classification.
 
-```
+```bash
 python3 openke_test.py
 ```
+
+TODO Add cli options
 
 #### Link Prediction
 
@@ -112,6 +204,10 @@ fr. we use two measures as our evaluation metric:
 * *Hit@N* : proportion of correct entities in top-N ranked entities.
 
 TODO Describe the constraint stuff
+TODO Return the output from the DataLoader method, instead of printing to
+     stdout
+TODO Reset the global variable in C after this call, so we can call it multiple
+     times without restarting python.
 
 #### Triple Classificiation
 
@@ -122,17 +218,6 @@ score obtained by fr is below δr, the triple will be classified as positive,
 otherwise negative. δr is optimized by maximizing classification accuracies on
 the validation set.
 
-### Applying the Model
-
-TODO implement/document these
-
-#### Extracting Embeddings
-
-#### Predict Head/Tail Entity
-
-#### Predict Relation
-
-#### Classify Triple
 
 ## Citations
 
@@ -143,7 +228,7 @@ This is a fork of the [OpenKE](https://github.com/thunlp/OpenKE) project.
 If you use the code, please cite the following
 [paper](http://aclweb.org/anthology/D18-2024):
 
-```
+```latex
  @inproceedings{han2018openke,
    title={OpenKE: An Open Toolkit for Knowledge Embedding},
    author={Han, Xu and Cao, Shulin and Lv Xin and Lin, Yankai and Liu, Zhiyuan and Sun, Maosong and Li, Juanzi},
