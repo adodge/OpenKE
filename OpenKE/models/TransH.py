@@ -53,17 +53,12 @@ class TransH(Model):
 
     def loss_batch(self, batch_h, batch_t, batch_r, batch_size, n_negative):
 
-        inputs = self.split_inputs( batch_h, batch_t, batch_r, batch_size,
-                n_negative)
-
-        #To get positive triples and negative triples for training
-        #The shapes of pos_h, pos_t, pos_r are (batch_size, 1)
-        #The shapes of neg_h, neg_t, neg_r are (batch_size, n_negative)
-
-        # FIXME I missed the in_batch=False in the original.  This looks like
-        #       it's the difference of a transpose.
-        pos_h, pos_t, pos_r = inputs['positive_h'],inputs['positive_t'],inputs['positive_r']
-        neg_h, neg_t, neg_r = inputs['negative_h'],inputs['negative_t'],inputs['negative_r']
+        pos_h = batch_h[:batch_size]
+        pos_t = batch_t[:batch_size]
+        pos_r = batch_r[:batch_size]
+        neg_h = batch_h[batch_size:]
+        neg_t = batch_t[batch_size:]
+        neg_r = batch_r[batch_size:]
 
         #Embedding entities and relations of triples, e.g. pos_h_e, pos_t_e and pos_r_e are embeddings for positive triples
         pos_h_e = tf.nn.embedding_lookup(self.ent_embeddings, pos_h)
