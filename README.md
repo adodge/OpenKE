@@ -111,23 +111,102 @@ model = OpenKE.models.TransE(
 
 ### Models
 
+All models have at least the following initialization options:
+
+* n\_entities
+* n\_relations
+
+These are most conveniently gotten from the DataLoader object properties of the
+same name.
+
+Creating the model object defines the variables for the parameters, so this
+needs to be done inside a tensorflow graph/session context:
+
+```python
+graph = tf.Graph()
+with graph.as_default():
+    sess = tf.Session()
+    with sess.as_default()
+        model = OpenKE.models.TransE(
+            n_entities=data.n_entities,
+            n_relations=data.n_relations)
+```
+
+To add the model to your computation graph, call the methods on the model
+object, passing in inputs (as tensorflow nodes) and returning outputs (also
+tensorflow nodes).
+
+All models implement at least the following methods:
+
+* loss
+* predict
+
 #### Analogy
+
+TODO What is this model?  A combination of ComplEx and DistMult?
+
+Additional hyperparameters:
+* hidden\_size
+* lmbda
+
 #### ComplEx
 * [ComplEx](http://proceedings.mlr.press/v48/trouillon16.pdf)
+
+Additional hyperparameters:
+* hidden\_size
+* lmbda
+
 #### DistMult
 * [DistMult](https://arxiv.org/pdf/1412.6575.pdf)
+
+Additional hyperparameters:
+* hidden\_size
+* lmbda
+
 #### HolE
 * [HolE](https://www.aaai.org/ocs/index.php/AAAI/AAAI16/paper/viewFile/12484/11828)
+
+Additional hyperparameters:
+* hidden\_size
+* margin
+
 #### RESCAL
 * [RESCAL](http://www.icml-2011.org/papers/438_icmlpaper.pdf)
+
+Additional hyperparameters:
+* hidden\_size
+* margin
+
 #### TransD
 * [TransD](http://anthology.aclweb.org/P/P15/P15-1067.pdf)
+
+Additional hyperparameters:
+* hidden\_size
+* margin
+
 #### TransE
 * [TransE](http://papers.nips.cc/paper/5071-translating-embeddings-for-modeling-multi-relational-data.pdf)
+
+Additional hyperparameters:
+* hidden\_size
+* margin
+
 #### TransH
 * [TransH](https://www.aaai.org/ocs/index.php/AAAI/AAAI14/paper/viewFile/8531/8546)
+
+Additional hyperparameters:
+* hidden\_size
+* rel\_size
+* margin
+
 #### TransR
 * [TransR](https://www.aaai.org/ocs/index.php/AAAI/AAAI15/paper/viewFile/9571/9523/)
+
+Additional hyperparameters:
+* hidden\_size
+* ent\_size
+* rel\_size
+* margin
 
 ### Using the Model
 
