@@ -25,7 +25,7 @@ class TransR(Model):
         self.args.extend(['margin', 'hidden_size', 'rel_size', 'ent_size'])
 
     def _transfer(self, transfer_matrix, embeddings):
-        return tf.batch_matmul(transfer_matrix, embeddings)
+        return tf.matmul(transfer_matrix, embeddings)
 
     def _calc(self, h, t, r):
         return abs(h + r - t)
@@ -89,7 +89,7 @@ class TransR(Model):
         _p_score = self._calc(p_h, p_t, p_r)
         _p_score = tf.reshape(_p_score, [-1, 1, self.rel_size])
         _n_score = self._calc(n_h, n_t, n_r)
-        _n_score = tf.reshape(_n_score, [-1, self.n_negative, self.rel_size])
+        _n_score = tf.reshape(_n_score, [-1, n_negative, self.rel_size])
 
         #The shape of p_score is (batch_size, 1)
         #The shape of n_score is (batch_size, 1)

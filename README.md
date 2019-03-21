@@ -156,12 +156,16 @@ Additional hyperparameters:
 * hidden\_size
 * lmbda
 
+NOTE: Needs to be trained with a much higher alpha (like 0.1)
+
 #### DistMult
 * [DistMult](https://arxiv.org/pdf/1412.6575.pdf)
 
 Additional hyperparameters:
 * hidden\_size
 * lmbda
+
+NOTE: Needs to be trained with a much higher alpha (like 0.1)
 
 #### HolE
 * [HolE](https://www.aaai.org/ocs/index.php/AAAI/AAAI16/paper/viewFile/12484/11828)
@@ -170,12 +174,16 @@ Additional hyperparameters:
 * hidden\_size
 * margin
 
+NOTE: Needs to be trained with a much higher alpha (like 0.1)
+
 #### RESCAL
 * [RESCAL](http://www.icml-2011.org/papers/438_icmlpaper.pdf)
 
 Additional hyperparameters:
 * hidden\_size
 * margin
+
+NOTE: Needs to be trained with a much higher alpha (like 0.1)
 
 #### TransD
 * [TransD](http://anthology.aclweb.org/P/P15/P15-1067.pdf)

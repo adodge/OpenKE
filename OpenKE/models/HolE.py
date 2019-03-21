@@ -73,7 +73,7 @@ class HolE(Model):
         #The shape of _p_score is (batch_size, 1, 1)
         #The shape of _n_score is (batch_size, negative_ent + negative_rel, 1)
         _p_score = tf.reshape(self._calc(pos_h_e, pos_t_e, pos_r_e), [-1, 1])
-        _n_score = tf.reshape(self._calc(neg_h_e, neg_t_e, neg_r_e), [-1, self.n_negative])
+        _n_score = tf.reshape(self._calc(neg_h_e, neg_t_e, neg_r_e), [-1, n_negative])
 
         #The shape of p_score is (batch_size, 1)
         #The shape of n_score is (batch_size, 1)

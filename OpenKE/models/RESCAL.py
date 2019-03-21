@@ -3,6 +3,8 @@ import numpy as np
 import tensorflow as tf
 from .Model import Model
 
+# FIXME Doesn't seem to work
+
 class RESCAL(Model):
     '''
     RESCAL is a tensor factorization approach to knowledge representation learning, 
@@ -60,7 +62,7 @@ class RESCAL(Model):
         #The shape of _p_score is (batch_size, 1, hidden_size)
         #The shape of _n_score is (batch_size, negative_ent + negative_rel, hidden_size)
         _p_score = tf.reshape(self._calc(p_h, p_t, p_r), [-1, 1, self.hidden_size])
-        _n_score = tf.reshape(self._calc(n_h, n_t, n_r), [-1, self.n_negative, self.hidden_size])
+        _n_score = tf.reshape(self._calc(n_h, n_t, n_r), [-1, n_negative, self.hidden_size])
 
         #The shape of p_score is (batch_size, 1)
         #The shape of n_score is (batch_size, 1)
