@@ -9,8 +9,11 @@ setup(
         name='OpenKE',
         version='0.0.1',
         packages=find_packages(),
+        extra_packages = {
+            'tensorflow': ['tensorflow>=1.13.1'],
+            'tensorflow with gpu': ['tensorflow-gpu>=1.13.1']
+            },
         install_requires=[
-            'tensorflow',
             'numpy',
             ],
         ext_modules=[dataloader],
