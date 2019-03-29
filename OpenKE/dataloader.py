@@ -13,6 +13,70 @@ def allocate_array(shape, dtype):
     return array,addr
     # TODO change this to return a namespace so we don't have to index
 
+class PyDataLoader:
+    '''
+    A pure-python version of DataLoader.
+    '''
+    def __init__(self,
+            data_path:str,
+            batch_size:int):
+        self.data_path = data_path
+        self.batch_size = batch_size
+
+        with open(os.path.join(data_path, 'entity2id.txt')) as fd:
+            self.n_entities = int(fd.readline())
+        with open(os.path.join(data_path, 'relation2id.txt')) as fd:
+            self.n_relations = int(fd.readline())
+
+        with open(os.path.join(data_path, 'train2id.txt')) as fd:
+            self.n_samples = int(fd.readline())
+            self.data = np.zeros( (self.n_samples, 3), dtype=np.int32 )
+
+    @property
+    def n_batches(self):
+        return self.n_samples // self.batch_size
+
+    @property
+    def n_negative(self):
+        return 1
+
+    @property
+    def batch_seq_size(self):
+        return self.batch_size*2
+
+    def sample(self):
+
+        # Sample positive
+        idxes = np.random.randint(self.data.shape[0], size=self.batch_size)
+        hp = self.data[idxes,0]
+        tp = self.data[idxes,1]
+        rp = self.data[idxes,2]
+        yp = np.ones(self.batch_size, dtype=np.float32)
+
+        # Randomly corrupt the heads and tails
+        hn = self.data[idxes,0]
+        tn = self.data[idxes,1]
+        rn = self.data[idxes,2]
+        yp = -np.ones(self.batch_size, dtype=np.float32)
+
+        headortail = np.random.randint(2, size=self.batch_size)
+        # TODO select corruptions from the effective domain or range of the
+        #      given relation
+        rand = np.random.randint(self.n_entities, size=self.batch_size
+        for idx,(col,val) in enumerate(zip(headortail,rand)):
+            if col == 0:
+                hn[idx] = val
+            elif col == 1:
+                tn[idx] = val
+
+        h = np.hstack([hp,hn])
+        t = np.hstack([tp,tn])
+        r = np.hstack([rp,rn])
+        y = np.hstack([yp,yn])
+
+        return h,t,r,y
+
+
 class DataLoader:
     '''
     Call out to the C functions to load and sample data.
