@@ -31,6 +31,9 @@ class PyDataLoader:
         with open(os.path.join(data_path, 'train2id.txt')) as fd:
             self.n_samples = int(fd.readline())
             self.data = np.zeros( (self.n_samples, 3), dtype=np.int32 )
+            for row,line in enumerate(fd):
+                h,t,r = line.strip().split('\t')
+                self.data[row] = [int(h),int(t),int(r)]
 
     @property
     def n_batches(self):
@@ -62,7 +65,7 @@ class PyDataLoader:
         headortail = np.random.randint(2, size=self.batch_size)
         # TODO select corruptions from the effective domain or range of the
         #      given relation
-        rand = np.random.randint(self.n_entities, size=self.batch_size
+        rand = np.random.randint(self.n_entities, size=self.batch_size)
         for idx,(col,val) in enumerate(zip(headortail,rand)):
             if col == 0:
                 hn[idx] = val
